@@ -10,14 +10,13 @@ import android.app.FragmentTransaction;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
@@ -26,6 +25,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
 
 
 public class MainActivity extends Activity implements ActionBar.TabListener {
@@ -136,7 +136,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             // Return a PlaceholderFragment (defined as a static inner class below).
 
 
-            if (position > 1) {
+            if (position == 0) {
                 return MapFragment.newInstance(position+1);
             }
 
@@ -210,19 +210,23 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         public MapFragment() {
         }
 
-        MapView mMapView;
+        MapView mapView;
         private GoogleMap googleMap;
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                                  Bundle savedInstanceState) {
+
+
             // inflat and return the layout
             View v = inflater.inflate(R.layout.fragment_map, container,
                     false);
-            mMapView = (MapView) v.findViewById(R.id.mapView);
-            mMapView.onCreate(savedInstanceState);
+            mapView = (MapView) v.findViewById(R.id.mapView);
+            mapView.onCreate(savedInstanceState);
 
-            mMapView.onResume();// needed to get the map to display immediately
+            //mapView.requestTransparentRegion(mapView);
+
+            mapView.onResume();// needed to get the map to display immediately
 
             try {
                 MapsInitializer.initialize(getActivity().getApplicationContext());
@@ -230,25 +234,67 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
                 e.printStackTrace();
             }
 
-            googleMap = mMapView.getMap();
-            // latitude and longitude
-            double latitude = 51;
-            double longitude = -2;
+            googleMap = mapView.getMap();
 
-            // create marker
-            MarkerOptions marker = new MarkerOptions().position(
-                    new LatLng(latitude, longitude)).title("Hello Maps");
 
-            // Changing marker icon
-            marker.icon(BitmapDescriptorFactory
-                    .defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
 
-            // adding marker
-            googleMap.addMarker(marker);
+
+
+//            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
+//                    new LatLng(-18.142, 178.431), 2),2000,null);
+//
+//            // Polylines are useful for marking paths and routes on the map.
+//            googleMap.addPolyline(new PolylineOptions().geodesic(true)
+//                    .add(new LatLng(-33.866, 151.195))  // Sydney
+//                    .add(new LatLng(-18.142, 178.431))  // Fiji
+//                    .add(new LatLng(21.291, -157.821))  // Hawaii
+//                    .add(new LatLng(37.423, -122.091))  // Mountain View
+//            );
+
+
+              final LatLng SYDNEY = new LatLng(-33.88,151.21);
+              final LatLng MOUNTAIN_VIEW = new LatLng(37.4, -122.1);
+
+            // Move the camera instantly to Sydney with a zoom of 15.
+            googleMap.moveCamera(CameraUpdateFactory.newLatLngZoom(SYDNEY, 15));
+
+// Zoom in, animating the camera.
+            googleMap.animateCamera(CameraUpdateFactory.zoomIn());
+
+// Zoom out to zoom level 10, animating with a duration of 2 seconds.
+            googleMap.animateCamera(CameraUpdateFactory.zoomTo(10), 2000, null);
+
+// Construct a CameraPosition focusing on Mountain View and animate the camera to that position.
             CameraPosition cameraPosition = new CameraPosition.Builder()
-                    .target(new LatLng(51, -2)).zoom(12).build();
-            googleMap.animateCamera(CameraUpdateFactory
-                    .newCameraPosition(cameraPosition));
+                    .target(MOUNTAIN_VIEW)      // Sets the center of the map to Mountain View
+                    .zoom(17)                   // Sets the zoom
+                    .bearing(90)                // Sets the orientation of the camera to east
+                    .tilt(30)                   // Sets the tilt of the camera to 30 degrees
+                    .build();                   // Creates a CameraPosition from the builder
+            googleMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+
+//
+//
+//            // latitude and longitude
+//            double latitude = 51;
+//            double longitude = -2;
+//
+//            // create marker
+//            MarkerOptions marker = new MarkerOptions().position(
+//                    new LatLng(latitude, longitude)).title("Hello Maps");
+//
+//            // Changing marker icon
+//            marker.icon(BitmapDescriptorFactory
+//                    .defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+//
+//            // adding marker
+//            googleMap.addMarker(marker);
+//            CameraPosition cameraPosition = new CameraPosition.Builder()
+//                    .target(new LatLng(51, -2)).zoom(12).build();
+//            googleMap.animateCamera(CameraUpdateFactory
+//                    .newCameraPosition(cameraPosition));
+
+            //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
             // Perform any camera updates here
             return v;
@@ -257,25 +303,25 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         @Override
         public void onResume() {
             super.onResume();
-            mMapView.onResume();
+            mapView.onResume();
         }
 
         @Override
         public void onPause() {
             super.onPause();
-            mMapView.onPause();
+            mapView.onPause();
         }
 
         @Override
         public void onDestroy() {
             super.onDestroy();
-            mMapView.onDestroy();
+            mapView.onDestroy();
         }
 
         @Override
         public void onLowMemory() {
             super.onLowMemory();
-            mMapView.onLowMemory();
+            mapView.onLowMemory();
         }
 
     }
