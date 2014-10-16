@@ -1,4 +1,4 @@
-package com.mendhak.gpsvisualizer;
+package com.mendhak.gpsvisualizer.views;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -7,10 +7,8 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.common.collect.Lists;
-import com.google.common.primitives.Booleans;
-import com.google.common.primitives.Ints;
+import com.mendhak.gpsvisualizer.R;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import lecho.lib.hellocharts.model.Axis;

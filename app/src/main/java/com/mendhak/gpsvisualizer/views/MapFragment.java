@@ -1,4 +1,4 @@
-package com.mendhak.gpsvisualizer;
+package com.mendhak.gpsvisualizer.views;
 
 import android.app.Fragment;
 import android.os.Bundle;
@@ -12,8 +12,17 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.common.base.Function;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.mendhak.gpsvisualizer.R;
+import com.mendhak.gpsvisualizer.common.GpsPoint;
+import com.mendhak.gpsvisualizer.common.GpsTrack;
 
-public  class MapFragment extends Fragment {
+import java.util.List;
+
+public  class MapFragment extends BaseFragment {
 
     public static MapFragment newInstance(int sectionNumber) {
         MapFragment fragment = new MapFragment();
@@ -28,6 +37,8 @@ public  class MapFragment extends Fragment {
 
     MapView mapView;
     private GoogleMap googleMap;
+    private View rootView;
+    private GpsTrack track;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -35,10 +46,10 @@ public  class MapFragment extends Fragment {
 
 
         // inflat and return the layout
-        View v = inflater.inflate(R.layout.fragment_map, container,
-                false);
-        mapView = (MapView) v.findViewById(R.id.mapView);
+        rootView = inflater.inflate(R.layout.fragment_map, container, false);
+        mapView = (MapView) rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
+
 
         //mapView.requestTransparentRegion(mapView);
 
@@ -52,9 +63,51 @@ public  class MapFragment extends Fragment {
 
         googleMap = mapView.getMap();
 
+        return rootView;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        mapView.onLowMemory();
+    }
+
+    @Override
+    public void SetGpsPoints(GpsTrack track) {
+
+        this.track = track;
+        RenderMap();
+    }
+
+    private void RenderMap(){
 
 
+        List<LatLng> gmapLatLongs = Lists.transform(track.getPoints(), new Function<GpsPoint, LatLng>() {
+            @Override
+            public LatLng apply(GpsPoint input) {
+                return new LatLng(input.getLatitude(), input.getLongitude());
+            }
+        });
 
+        googleMap.addPolyline(new PolylineOptions().geodesic(true).add(Iterables.toArray(gmapLatLongs, LatLng.class)));
 
 //            googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(
 //                    new LatLng(-18.142, 178.431), 2),2000,null);
@@ -113,31 +166,5 @@ public  class MapFragment extends Fragment {
         //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
         // Perform any camera updates here
-        return v;
     }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        mapView.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-        mapView.onPause();
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        mapView.onDestroy();
-    }
-
-    @Override
-    public void onLowMemory() {
-        super.onLowMemory();
-        mapView.onLowMemory();
-    }
-
 }
