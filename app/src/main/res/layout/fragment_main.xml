@@ -15,6 +15,13 @@
         android:text="WOOPS"
         />
 
+    <Button
+        android:layout_width="fill_parent"
+        android:layout_height="35dp"
+        android:id="@+id/btnImportData"
+        android:text="Click"
+        />
+
 
 
 </RelativeLayout>
