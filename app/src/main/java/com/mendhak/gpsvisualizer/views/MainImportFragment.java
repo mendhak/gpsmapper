@@ -1,5 +1,6 @@
 package com.mendhak.gpsvisualizer.views;
 
+import android.app.Activity;
 import android.app.Fragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -12,21 +13,14 @@ import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 
-/**
- * A placeholder fragment containing a simple view.
- */
+
 public  class MainImportFragment extends Fragment implements View.OnClickListener {
-    /**
-     * The fragment argument representing the section number for this
-     * fragment.
-     */
+
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     GpsTrack flatTrack;
-    /**
-     * Returns a new instance of this fragment for the given section
-     * number.
-     */
+    IDataImportListener mCallback;
+
     public static MainImportFragment newInstance(int sectionNumber) {
         MainImportFragment fragment = new MainImportFragment();
         Bundle args = new Bundle();
@@ -35,6 +29,19 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
         return fragment;
     }
 
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+
+        // This makes sure that the container activity has implemented
+        // the callback interface. If not, it throws an exception
+        try {
+            mCallback = (IDataImportListener) activity;
+        } catch (ClassCastException e) {
+            throw new ClassCastException(activity.toString()
+                    + " must implement IDataImportListener");
+        }
+    }
     public MainImportFragment() {
     }
 
@@ -54,6 +61,7 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
         switch(view.getId()){
             case R.id.btnImportData:
                 ProcessUserGpsFile();
+                mCallback.OnDataImported(flatTrack);
                 break;
         }
     }
@@ -117,5 +125,9 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
                 GpsPoint.from(45.4099806f, -121.7134527f, null)
         ));
 
+    }
+
+    public interface IDataImportListener{
+        public void OnDataImported(GpsTrack track);
     }
 }

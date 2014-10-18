@@ -10,22 +10,20 @@ import android.app.FragmentTransaction;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.common.collect.Lists;
-import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
+import com.mendhak.gpsvisualizer.common.ProcessedData;
 import com.mendhak.gpsvisualizer.views.BaseFragment;
 import com.mendhak.gpsvisualizer.views.ChartFragment;
 import com.mendhak.gpsvisualizer.views.MainImportFragment;
 import com.mendhak.gpsvisualizer.views.MapFragment;
 
 
-public class MainActivity extends Activity implements ActionBar.TabListener {
+public class MainActivity extends Activity implements ActionBar.TabListener, MainImportFragment.IDataImportListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -124,6 +122,12 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
     @Override
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
+    }
+
+    @Override
+    public void OnDataImported(GpsTrack track) {
+        Log.i("GPSLogger", "Data imported");
+        ProcessedData.SetTrack(track);
     }
 
     /**

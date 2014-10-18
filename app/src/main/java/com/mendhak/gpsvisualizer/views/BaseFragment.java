@@ -7,6 +7,6 @@ import com.mendhak.gpsvisualizer.common.GpsTrack;
 
 public abstract class BaseFragment extends Fragment {
 
-    public abstract void SetGpsPoints(GpsTrack track);
+
 
 }
