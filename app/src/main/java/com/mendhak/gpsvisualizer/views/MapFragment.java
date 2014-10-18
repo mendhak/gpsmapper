@@ -27,7 +27,7 @@ import com.mendhak.gpsvisualizer.common.ProcessedData;
 import java.util.List;
 import java.util.Set;
 
-public  class MapFragment extends BaseFragment {
+public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedCallback {
 
     public static MapFragment newInstance(int sectionNumber) {
         MapFragment fragment = new MapFragment();
@@ -112,7 +112,7 @@ public  class MapFragment extends BaseFragment {
         if (m_iAmVisible) {
             Log.d("GPSVisualizer", "this fragment is now visible");
 
-            RenderMap();
+            SetupMap();
         } else {
             Log.d("GPSVisualizer", "this fragment is now invisible");
         }
@@ -141,10 +141,11 @@ public  class MapFragment extends BaseFragment {
 
     private void SetupMap(){
 
-        if(googleMap != null){
-            return;
-        }
+//        if(googleMap != null){
+//            return;
+//        }
         googleMap = mapView.getMap();
+        googleMap.setOnMapLoadedCallback(this);
         //RenderMap();
     }
 
@@ -236,5 +237,10 @@ public  class MapFragment extends BaseFragment {
         //googleMap.setMapType(GoogleMap.MAP_TYPE_TERRAIN);
 
         // Perform any camera updates here
+    }
+
+    @Override
+    public void onMapLoaded() {
+        RenderMap();
     }
 }
