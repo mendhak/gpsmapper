@@ -10,6 +10,7 @@ import java.util.List;
  */
 public class GpsTrack {
     private List<GpsPoint> trackPoints = Lists.newLinkedList();
+    private List<GpsPoint> wayPoints = Lists.newLinkedList();
 
 
     /**
@@ -28,11 +29,15 @@ public class GpsTrack {
         this.trackPoints = trackPoints;
     }
 
-    /**
-     * Adds to the existing trackpoints
-     * @param trackPoints
-     */
-    public void addTrackpoints(List<GpsPoint> trackPoints){
-        this.trackPoints.addAll(trackPoints);
+
+
+    public List<GpsPoint> getWayPoints() {
+        return wayPoints;
     }
+
+    public void setWayPoints(List<GpsPoint> wayPoints) {
+        this.wayPoints = wayPoints;
+    }
+
+
 }

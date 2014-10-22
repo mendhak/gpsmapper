@@ -29,13 +29,7 @@ import javax.xml.parsers.SAXParserFactory;
 public class Gpx10Parser {
 
     List<GpsPoint> trackPoints = Lists.newArrayList();
-
-    public GpsTrack GetParsedTrack(){
-        GpsTrack track = new GpsTrack();
-        track.setTrackPoints(trackPoints);
-        Log.d("GPSVisualizer", String.valueOf(trackPoints.size()));
-        return track;
-    }
+    List<GpsPoint> wayPoints = Lists.newArrayList();
 
     public void Parse(String filePath, IDataImportListener callback) {
         try {
@@ -47,6 +41,9 @@ public class Gpx10Parser {
 
                 float lat;
                 float lon;
+                boolean wpt;
+                boolean wptName;
+                String wayPointName;
 
                 public void startElement(String uri, String localName,String qName,
                                          Attributes attributes) throws SAXException {
@@ -59,6 +56,14 @@ public class Gpx10Parser {
                         lon = Float.valueOf(attributes.getValue("lon"));
                     }
 
+                    if(qName.equalsIgnoreCase("wpt")){
+                        wpt = true;
+                    }
+
+                    if(qName.equalsIgnoreCase("name") && wpt){
+                        wptName = true;
+                    }
+
                 }
 
                 public void endElement(String uri, String localName,
@@ -68,10 +73,21 @@ public class Gpx10Parser {
                         trackPoints.add(GpsPoint.from(lat, lon, null));
                     }
 
+                    if(qName.equalsIgnoreCase("wpt")){
+                        wayPoints.add(GpsPoint.wayPoint(lat, lon, wayPointName));
+                        wpt = false;
+                        wptName = false;
+                    }
+
                 }
 
                 public void characters(char ch[], int start, int length) throws SAXException {
 
+                    if(wptName){
+                        Log.i("GPSVisualizer", "Waypoint: " + new String(ch, start, length));
+                        wayPointName = new String(ch, start, length);
+                        wptName = false;
+                    }
 //                    if (bfname) {
 //                        System.out.println("First Name : " + new String(ch, start, length));
 //                        bfname = false;
@@ -104,6 +120,8 @@ public class Gpx10Parser {
             saxParser.parse(is, handler);
             GpsTrack track = new GpsTrack();
             track.setTrackPoints(trackPoints);
+            track.setWayPoints(wayPoints);
+
             callback.OnDataImported(track);
 
 

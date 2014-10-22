@@ -12,6 +12,7 @@ public class GpsPoint {
     private float latitude;
     private float longitude;
     private float elevation;
+    private String description;
 
 
     public static GpsPoint from(float latitude, float longitude, @Nullable Float elevation){
@@ -19,6 +20,14 @@ public class GpsPoint {
         p.setLatitude(latitude);
         p.setLongitude(longitude);
         p.setElevation(Optional.fromNullable(elevation).or(0f));
+        return p;
+    }
+
+    public static GpsPoint wayPoint(float latitude, float longitude, String description){
+        GpsPoint p = new GpsPoint();
+        p.setLatitude(latitude);
+        p.setLongitude(longitude);
+        p.setDescription(description);
         return p;
     }
 
@@ -44,5 +53,13 @@ public class GpsPoint {
 
     public void setElevation(float elevation) {
         this.elevation = elevation;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }

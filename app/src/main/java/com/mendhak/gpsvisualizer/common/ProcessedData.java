@@ -15,6 +15,7 @@ public final class ProcessedData {
         }
 
         track.setTrackPoints(processedTracks.getTrackPoints());
+        track.setWayPoints(processedTracks.getWayPoints());
     }
 
     public static GpsTrack GetTrack()

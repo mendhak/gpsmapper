@@ -10,8 +10,10 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -149,6 +151,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
 
         googleMap.clear();
         track = ProcessedData.GetTrack();
+        Log.i("GPSVisualizer", "Waypoints: " + String.valueOf(track.getWayPoints().size()));
 
 
         if(track.getTrackPoints().size() > 0){
@@ -173,6 +176,18 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
             googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 35),2000, null);
 
             //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Iterables.getFirst(gmapLatLongs, null), 8), 2000, null);
+
+
+            for(GpsPoint wpt : track.getWayPoints()){
+                MarkerOptions marker = new MarkerOptions().position(
+                        new LatLng(wpt.getLatitude(), wpt.getLongitude())).title(wpt.getDescription());
+                // Changing marker icon
+                marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+                // adding marker
+                googleMap.addMarker(marker);
+            }
+
+
         }
 
 
