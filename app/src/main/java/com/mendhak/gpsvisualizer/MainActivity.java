@@ -23,7 +23,7 @@ import com.mendhak.gpsvisualizer.views.MainImportFragment;
 import com.mendhak.gpsvisualizer.views.MapFragment;
 
 
-public class MainActivity extends Activity implements ActionBar.TabListener, MainImportFragment.IDataImportListener {
+public class MainActivity extends Activity implements ActionBar.TabListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -124,11 +124,6 @@ public class MainActivity extends Activity implements ActionBar.TabListener, Mai
     public void onTabReselected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
     }
 
-    @Override
-    public void OnDataImported(GpsTrack track) {
-        Log.i("GPSLogger", "Data imported");
-        ProcessedData.SetTrack(track);
-    }
 
     /**
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to

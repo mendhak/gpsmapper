@@ -6,6 +6,7 @@ import android.util.Log;
 import com.google.common.collect.Lists;
 import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
+import com.mendhak.gpsvisualizer.common.IDataImportListener;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -22,18 +23,21 @@ import java.util.List;
 import javax.xml.parsers.SAXParser;
 import javax.xml.parsers.SAXParserFactory;
 
+/**
+ * Given a GPX file, parses the tracks and holds it. When GetParsedTrack is called, returns a GpsTrack.
+ */
 public class Gpx10Parser {
 
-    List<GpsPoint> points = Lists.newArrayList();
+    List<GpsPoint> trackPoints = Lists.newArrayList();
 
     public GpsTrack GetParsedTrack(){
         GpsTrack track = new GpsTrack();
-        track.setPoints(points);
-        Log.d("GPSVisualizer", String.valueOf(points.size()));
+        track.setTrackPoints(trackPoints);
+        Log.d("GPSVisualizer", String.valueOf(trackPoints.size()));
         return track;
     }
 
-    public void Parse(String filePath) {
+    public void Parse(String filePath, IDataImportListener callback) {
         try {
 
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -61,7 +65,7 @@ public class Gpx10Parser {
                                        String qName) throws SAXException {
 
                     if(qName.equalsIgnoreCase("trkpt")){
-                        points.add(GpsPoint.from(lat, lon, null));
+                        trackPoints.add(GpsPoint.from(lat, lon, null));
                     }
 
                 }
@@ -98,6 +102,9 @@ public class Gpx10Parser {
             is.setEncoding("UTF-8");
 
             saxParser.parse(is, handler);
+            GpsTrack track = new GpsTrack();
+            track.setTrackPoints(trackPoints);
+            callback.OnDataImported(track);
 
 
         } catch (Exception e) {

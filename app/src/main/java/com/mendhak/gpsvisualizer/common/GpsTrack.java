@@ -5,18 +5,34 @@ import com.google.common.collect.Lists;
 
 import java.util.List;
 
+/**
+ * Holds information about a track, such as trackpoints, waypoints...
+ */
 public class GpsTrack {
-    private List<GpsPoint> points = Lists.newLinkedList();
+    private List<GpsPoint> trackPoints = Lists.newLinkedList();
 
-    public List<GpsPoint> getPoints() {
-        return points;
+
+    /**
+     * Returns trackpoints for the held track
+     * @return
+     */
+    public List<GpsPoint> getTrackPoints() {
+        return trackPoints;
     }
 
-    public void setPoints(List<GpsPoint> points) {
-        this.points = points;
+    /**
+     * Sets trackpoints for the held track
+     * @param trackPoints
+     */
+    public void setTrackPoints(List<GpsPoint> trackPoints) {
+        this.trackPoints = trackPoints;
     }
 
-    public void addPoints(List<GpsPoint> points){
-        this.points.addAll(points);
+    /**
+     * Adds to the existing trackpoints
+     * @param trackPoints
+     */
+    public void addTrackpoints(List<GpsPoint> trackPoints){
+        this.trackPoints.addAll(trackPoints);
     }
 }

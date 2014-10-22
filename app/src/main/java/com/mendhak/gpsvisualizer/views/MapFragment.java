@@ -1,6 +1,5 @@
 package com.mendhak.gpsvisualizer.views;
 
-import android.app.Fragment;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -11,10 +10,8 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -25,7 +22,6 @@ import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.ProcessedData;
 
 import java.util.List;
-import java.util.Set;
 
 public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedCallback {
 
@@ -155,10 +151,10 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         track = ProcessedData.GetTrack();
 
 
-        if(track.getPoints().size() > 0){
-            Log.i("GPSVisualizer", "Track points: " + String.valueOf(track.getPoints().size()));
+        if(track.getTrackPoints().size() > 0){
+            Log.i("GPSVisualizer", "Track points: " + String.valueOf(track.getTrackPoints().size()));
 
-            List<LatLng> gmapLatLongs = Lists.transform(track.getPoints(), new Function<GpsPoint, LatLng>() {
+            List<LatLng> gmapLatLongs = Lists.transform(track.getTrackPoints(), new Function<GpsPoint, LatLng>() {
                 @Override
                 public LatLng apply(GpsPoint input) {
                     return new LatLng(input.getLatitude(), input.getLongitude());

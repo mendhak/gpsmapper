@@ -1,7 +1,9 @@
 package com.mendhak.gpsvisualizer.common;
 
-
-public final  class ProcessedData {
+/**
+ * A singleton class that holds the currently processed track. Accessible from all activities and fragments.
+ */
+public final class ProcessedData {
     public static GpsTrack track;
 
 
@@ -12,7 +14,7 @@ public final  class ProcessedData {
             track = new GpsTrack();
         }
 
-        track.setPoints(processedTracks.getPoints());
+        track.setTrackPoints(processedTracks.getTrackPoints());
     }
 
     public static GpsTrack GetTrack()

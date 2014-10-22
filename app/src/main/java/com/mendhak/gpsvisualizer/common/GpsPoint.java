@@ -5,6 +5,9 @@ import android.support.annotation.Nullable;
 
 import com.google.common.base.Optional;
 
+/**
+ * Represents a single GPS point with information such as lat, long, elevation, description, speed, bearing...
+ */
 public class GpsPoint {
     private float latitude;
     private float longitude;
