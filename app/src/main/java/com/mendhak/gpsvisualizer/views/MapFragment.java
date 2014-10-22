@@ -151,6 +151,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
 
     private void RenderMap(){
 
+        googleMap.clear();
         track = ProcessedData.GetTrack();
 
 
