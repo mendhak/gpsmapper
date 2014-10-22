@@ -186,8 +186,6 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
                 // adding marker
                 googleMap.addMarker(marker);
             }
-
-
         }
 
 
