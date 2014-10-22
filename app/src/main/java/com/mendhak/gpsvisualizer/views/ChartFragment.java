@@ -7,11 +7,17 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
+import com.google.common.primitives.Ints;
 import com.mendhak.gpsvisualizer.R;
+import com.mendhak.gpsvisualizer.common.GpsPoint;
+import com.mendhak.gpsvisualizer.common.GpsTrack;
+import com.mendhak.gpsvisualizer.common.ProcessedData;
 
 import java.util.List;
 
 import lecho.lib.hellocharts.model.Axis;
+import lecho.lib.hellocharts.model.AxisValue;
 import lecho.lib.hellocharts.model.Line;
 import lecho.lib.hellocharts.model.LineChartData;
 import lecho.lib.hellocharts.model.PointValue;
@@ -23,23 +29,19 @@ import lecho.lib.hellocharts.view.LineChartView;
 
 public class ChartFragment extends Fragment{
 
+    private GpsTrack track;
     private LineChartView chart;
     private LineChartData data;
-    private int numberOfLines = 1;
-    private int maxNumberOfLines = 4;
-    private int numberOfPoints = 12;
 
-    float[][] randomNumbersTab = new float[maxNumberOfLines][numberOfPoints];
 
-    private boolean hasAxes = true;
-    private boolean hasAxesNames = true;
-    private boolean hasLines = true;
-    private boolean hasPoints = true;
-    private ValueShape shape = ValueShape.CIRCLE;
-    private boolean isFilled = false;
-    private boolean hasLabels = false;
-    private boolean isCubic = false;
-    private boolean hasLabelForSelected = false;
+    List<PointValue> values;
+    List<AxisValue> xAxisValues;
+    String xAxisName;
+    String yAxisName;
+
+    float yAxisTop;
+    float yAxisBottom;
+
 
 
     public static ChartFragment newInstance(int sectionNumber) {
@@ -62,8 +64,15 @@ public class ChartFragment extends Fragment{
 
         chart = (LineChartView)rootView.findViewById(R.id.chart);
 
-        generateValues();
+        SetupChart();
+
+        return rootView;
+    }
+
+    private void SetupChart() {
+
         generateData();
+        applyToChart();
 
         // Disable viewpirt recalculations, see toggleCubic() method for more info.
         chart.setViewportCalculationEnabled(false);
@@ -72,68 +81,76 @@ public class ChartFragment extends Fragment{
 
 
         resetViewport();
-
-        return rootView;
     }
 
     private void resetViewport() {
-        // Reset viewport height range to (0,100)
         final Viewport v = new Viewport(chart.getMaxViewport());
-        v.bottom = 0;
-        v.top = 100;
+
+        v.top = yAxisTop;
+        v.bottom = yAxisBottom;
+
         chart.setMaxViewport(v);
         chart.setCurrentViewport(v, false);
     }
 
-    private void generateValues() {
-        for (int i = 0; i < maxNumberOfLines; ++i) {
-            for (int j = 0; j < numberOfPoints; ++j) {
-                randomNumbersTab[i][j] = (float) Math.random() * 100f;
-            }
-        }
-    }
+    private void applyToChart(){
+        Line line = new Line(values);
+        line.setColor(Utils.COLORS[0]);
+        line.setShape(ValueShape.CIRCLE);
+        line.setCubic(true);
+        line.setFilled(false);
+        line.setHasLabels(false);
+        line.setHasLabelsOnlyForSelected(true);
+        line.setHasLines(true);
+        line.setHasPoints(true);
 
-    private void generateData() {
+        data = new LineChartData(Lists.newArrayList(line));
 
-        List<Line> lines = Lists.newLinkedList();
+        Axis axisX = new Axis();
+        axisX.setValues(xAxisValues);
 
-        for (int i = 0; i < numberOfLines; ++i) {
+        Axis axisY = new Axis().setHasLines(true);
 
-            List<PointValue> values = Lists.newLinkedList();
-            for (int j = 0; j < numberOfPoints; ++j) {
-                values.add(new PointValue(j, randomNumbersTab[i][j]));
-            }
+        axisX.setName(xAxisName);
+        axisY.setName(yAxisName);
 
-            Line line = new Line(values);
-            line.setColor(Utils.COLORS[i]);
-            line.setShape(shape);
-            line.setCubic(isCubic);
-            line.setFilled(isFilled);
-            line.setHasLabels(true);
-            line.setHasLabelsOnlyForSelected(false);
-            line.setHasLines(hasLines);
-            line.setHasPoints(hasPoints);
-            lines.add(line);
-        }
-
-        data = new LineChartData(lines);
-
-        if (hasAxes) {
-            Axis axisX = new Axis();
-            Axis axisY = new Axis().setHasLines(true);
-            if (hasAxesNames) {
-                axisX.setName("Axis X");
-                axisY.setName("Axis Y");
-            }
-            data.setAxisXBottom(axisX);
-            data.setAxisYLeft(axisY);
-        } else {
-            data.setAxisXBottom(null);
-            data.setAxisYLeft(null);
-        }
+        data.setAxisXBottom(axisX);
+        data.setAxisYLeft(axisY);
 
         data.setBaseValue(Float.NEGATIVE_INFINITY);
         chart.setLineChartData(data);
+    }
+
+    private void generateData() {
+        track = ProcessedData.GetTrack();
+
+        values = Lists.newLinkedList();
+        xAxisValues = Lists.newLinkedList();
+
+        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
+            values.add(new PointValue(i, track.getTrackPoints().get(i).getElevation()));
+            xAxisValues.add(new AxisValue(i, String.valueOf(track.getTrackPoints().get(i).getLatitude()).toCharArray()));
+        }
+
+        xAxisName = "Axis X";
+        yAxisName = "Elevation (m)";
+
+        Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
+            @Override
+            public int compare(GpsPoint left, GpsPoint right) {
+
+                if(left.getElevation() > right.getElevation()){
+                    return 1;
+                }
+                if(left.getElevation() < right.getElevation()){
+                    return -1;
+                }
+                return 0;
+            }
+        };
+
+        yAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
+        yAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
 
     }
 }

@@ -43,6 +43,8 @@ public class Gpx10Parser {
                 float lon;
                 boolean wpt;
                 boolean wptName;
+                boolean eleTag;
+                float elevation;
                 String wayPointName;
 
                 public void startElement(String uri, String localName,String qName,
@@ -54,6 +56,10 @@ public class Gpx10Parser {
 
                     if(attributes.getValue("lon") != null){
                         lon = Float.valueOf(attributes.getValue("lon"));
+                    }
+
+                    if(qName.equalsIgnoreCase("ele")){
+                        eleTag = true;
                     }
 
                     if(qName.equalsIgnoreCase("wpt")){
@@ -70,7 +76,7 @@ public class Gpx10Parser {
                                        String qName) throws SAXException {
 
                     if(qName.equalsIgnoreCase("trkpt")){
-                        trackPoints.add(GpsPoint.from(lat, lon, null));
+                        trackPoints.add(GpsPoint.from(lat, lon, elevation));
                     }
 
                     if(qName.equalsIgnoreCase("wpt")){
@@ -87,6 +93,11 @@ public class Gpx10Parser {
                         Log.i("GPSVisualizer", "Waypoint: " + new String(ch, start, length));
                         wayPointName = new String(ch, start, length);
                         wptName = false;
+                    }
+
+                    if(eleTag){
+                        elevation = Float.valueOf(new String(ch, start, length));
+                        eleTag = false;
                     }
 //                    if (bfname) {
 //                        System.out.println("First Name : " + new String(ch, start, length));

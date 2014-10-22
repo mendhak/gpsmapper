@@ -151,12 +151,8 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
 
         googleMap.clear();
         track = ProcessedData.GetTrack();
-        Log.i("GPSVisualizer", "Waypoints: " + String.valueOf(track.getWayPoints().size()));
-
 
         if(track.getTrackPoints().size() > 0){
-            Log.i("GPSVisualizer", "Track points: " + String.valueOf(track.getTrackPoints().size()));
-
             List<LatLng> gmapLatLongs = Lists.transform(track.getTrackPoints(), new Function<GpsPoint, LatLng>() {
                 @Override
                 public LatLng apply(GpsPoint input) {
@@ -166,7 +162,6 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
 
             googleMap.addPolyline(new PolylineOptions().geodesic(true).add(Iterables.toArray(gmapLatLongs, LatLng.class)));
 
-
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (LatLng ll : gmapLatLongs) {
                 builder.include(ll);
@@ -174,7 +169,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
             LatLngBounds bounds = builder.build();
 
             googleMap.animateCamera(CameraUpdateFactory.newLatLngBounds(bounds, 35),2000, null);
-
+            //Focus on a specific point using:
             //googleMap.animateCamera(CameraUpdateFactory.newLatLngZoom(Iterables.getFirst(gmapLatLongs, null), 8), 2000, null);
 
 
