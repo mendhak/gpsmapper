@@ -44,17 +44,18 @@ public class Gpx10Parser {
 
                 float lat;
                 float lon;
-                boolean wpt;
-                boolean wptName;
-                boolean eleTag;
-                boolean timeTag;
                 float elevation;
                 Calendar calendar;
 
-                String wayPointName;
+
+                StringBuilder sb;
+                boolean parseIt = false;
 
                 public void startElement(String uri, String localName,String qName,
                                          Attributes attributes) throws SAXException {
+
+                    sb = new StringBuilder();
+                    parseIt=false;
 
                     if(attributes.getValue("lat") != null){
                        lat = Float.valueOf(attributes.getValue("lat"));
@@ -64,20 +65,10 @@ public class Gpx10Parser {
                         lon = Float.valueOf(attributes.getValue("lon"));
                     }
 
-                    if(qName.equalsIgnoreCase("ele")){
-                        eleTag = true;
-                    }
-
-                    if(qName.equalsIgnoreCase("time")){
-                        timeTag = true;
-                    }
-
-                    if(qName.equalsIgnoreCase("wpt")){
-                        wpt = true;
-                    }
-
-                    if(qName.equalsIgnoreCase("name") && wpt){
-                        wptName = true;
+                    if(qName.equalsIgnoreCase("ele")
+                            || qName.equalsIgnoreCase("time")
+                            || qName.equalsIgnoreCase("name") ){
+                        parseIt=true;
                     }
 
                 }
@@ -89,58 +80,31 @@ public class Gpx10Parser {
                         trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar));
                     }
 
-                    if(qName.equalsIgnoreCase("wpt")){
-                        wayPoints.add(GpsPoint.wayPoint(lat, lon, wayPointName));
-                        wpt = false;
-                        wptName = false;
+                    if(qName.equalsIgnoreCase("name")){
+                        wayPoints.add(GpsPoint.wayPoint(lat, lon, sb.toString()));
                     }
 
+                    if(qName.equalsIgnoreCase("time")){
+
+                        try {
+                            Log.d("GPSVisualizer","Parsing time: " + sb.toString());
+                            calendar = ISO8601.toCalendar(sb.toString());
+                        } catch (ParseException e) {
+                            Log.e("GPSVisualizer", "Could not parse " + sb.toString(), e);
+                            calendar = null;
+                        }
+                    }
+
+                    if(qName.equalsIgnoreCase("ele")){
+                        elevation = Float.valueOf(sb.toString());
+                    }
                 }
 
                 public void characters(char ch[], int start, int length) throws SAXException {
 
-                    if(wptName){
-                        Log.i("GPSVisualizer", "Waypoint: " + new String(ch, start, length));
-                        wayPointName = new String(ch, start, length);
-                        wptName = false;
+                    if(parseIt){
+                        sb.append(new String(ch, start, length));
                     }
-
-                    if(eleTag){
-                        elevation = Float.valueOf(new String(ch, start, length));
-                        eleTag = false;
-                    }
-
-                    if(timeTag){
-                        String timeString = new String(ch, start, length);
-                        try {
-                            calendar = ISO8601.toCalendar(timeString);
-                        } catch (ParseException e) {
-                            calendar = null;
-                        }
-
-                        timeTag=false;
-
-                    }
-
-//                    if (bfname) {
-//                        System.out.println("First Name : " + new String(ch, start, length));
-//                        bfname = false;
-//                    }
-//
-//                    if (blname) {
-//                        System.out.println("Last Name : " + new String(ch, start, length));
-//                        blname = false;
-//                    }
-//
-//                    if (bnname) {
-//                        System.out.println("Nick Name : " + new String(ch, start, length));
-//                        bnname = false;
-//                    }
-//
-//                    if (bsalary) {
-//                        System.out.println("Salary : " + new String(ch, start, length));
-//                        bsalary = false;
-//                    }
                 }
             };
 
@@ -160,6 +124,7 @@ public class Gpx10Parser {
 
 
         } catch (Exception e) {
+            Log.e("GPSVisualizer", "Could not parse GPX file", e);
             e.printStackTrace();
         }
     }
