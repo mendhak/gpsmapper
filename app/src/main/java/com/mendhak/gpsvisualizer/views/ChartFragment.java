@@ -8,12 +8,12 @@ import android.view.ViewGroup;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
-import com.google.common.primitives.Ints;
 import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.ProcessedData;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import lecho.lib.hellocharts.model.Axis;
@@ -71,7 +71,7 @@ public class ChartFragment extends Fragment{
 
     private void SetupChart() {
 
-        generateData();
+        generateDataElevationOverDuration();
         applyToChart();
 
         // Disable viewpirt recalculations, see toggleCubic() method for more info.
@@ -121,7 +121,7 @@ public class ChartFragment extends Fragment{
         chart.setLineChartData(data);
     }
 
-    private void generateData() {
+    private void generateDataElevationOverDuration() {
         track = ProcessedData.GetTrack();
 
         values = Lists.newLinkedList();
@@ -129,10 +129,18 @@ public class ChartFragment extends Fragment{
 
         for (int i = 0; i < track.getTrackPoints().size(); ++i) {
             values.add(new PointValue(i, track.getTrackPoints().get(i).getElevation()));
-            xAxisValues.add(new AxisValue(i, String.valueOf(track.getTrackPoints().get(i).getLatitude()).toCharArray()));
+
+            SimpleDateFormat timeFormat = new SimpleDateFormat("H:mm");
+            //String timeRepresentation =  timeFormat.format(track.getTrackPoints().get(i).getCalendar().getTime());
+            long elapsedMillis = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
+                    track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
+
+            xAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
         }
 
-        xAxisName = "Axis X";
+
+
+        xAxisName = "Duration (min)";
         yAxisName = "Elevation (m)";
 
         Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {

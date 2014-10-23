@@ -7,6 +7,7 @@ import com.google.common.collect.Lists;
 import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.IDataImportListener;
+import com.mendhak.gpsvisualizer.common.ISO8601;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
@@ -18,6 +19,8 @@ import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
+import java.text.ParseException;
+import java.util.Calendar;
 import java.util.List;
 
 import javax.xml.parsers.SAXParser;
@@ -44,7 +47,10 @@ public class Gpx10Parser {
                 boolean wpt;
                 boolean wptName;
                 boolean eleTag;
+                boolean timeTag;
                 float elevation;
+                Calendar calendar;
+
                 String wayPointName;
 
                 public void startElement(String uri, String localName,String qName,
@@ -62,6 +68,10 @@ public class Gpx10Parser {
                         eleTag = true;
                     }
 
+                    if(qName.equalsIgnoreCase("time")){
+                        timeTag = true;
+                    }
+
                     if(qName.equalsIgnoreCase("wpt")){
                         wpt = true;
                     }
@@ -76,7 +86,7 @@ public class Gpx10Parser {
                                        String qName) throws SAXException {
 
                     if(qName.equalsIgnoreCase("trkpt")){
-                        trackPoints.add(GpsPoint.from(lat, lon, elevation));
+                        trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar));
                     }
 
                     if(qName.equalsIgnoreCase("wpt")){
@@ -99,6 +109,19 @@ public class Gpx10Parser {
                         elevation = Float.valueOf(new String(ch, start, length));
                         eleTag = false;
                     }
+
+                    if(timeTag){
+                        String timeString = new String(ch, start, length);
+                        try {
+                            calendar = ISO8601.toCalendar(timeString);
+                        } catch (ParseException e) {
+                            calendar = null;
+                        }
+
+                        timeTag=false;
+
+                    }
+
 //                    if (bfname) {
 //                        System.out.println("First Name : " + new String(ch, start, length));
 //                        bfname = false;
