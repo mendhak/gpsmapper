@@ -121,14 +121,14 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     }
 
 
-    private static boolean m_iAmVisible;
+    private static boolean visibleToUser;
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        m_iAmVisible = isVisibleToUser;
+        visibleToUser = isVisibleToUser;
 
-        if (m_iAmVisible) {
+        if (visibleToUser) {
             Log.d("GPSVisualizer", "this fragment is now visible");
 
             SetupMap();
