@@ -65,8 +65,11 @@ public class ChartFragment extends Fragment{
 
     private void SetupChart() {
         track = ProcessedData.GetTrack();
-        ChartParameters params = generateDataElevationOverDuration();
-        applyToLineChart(params);
+        if(track.getTrackPoints() != null && track.getTrackPoints().size() > 0){
+            ChartParameters params = generateDataElevationOverDuration();
+            applyToLineChart(params);
+        }
+
     }
 
 
