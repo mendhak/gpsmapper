@@ -27,11 +27,13 @@ public class GpsPoint {
         return p;
     }
 
-    public static GpsPoint wayPoint(float latitude, float longitude, String description){
+    public static GpsPoint wayPoint(float latitude, float longitude, String description,  @Nullable Float elevation, @Nullable Calendar calendar){
         GpsPoint p = new GpsPoint();
         p.setLatitude(latitude);
         p.setLongitude(longitude);
         p.setDescription(description);
+        p.setElevation(Optional.fromNullable(elevation).or(0f));
+        p.setCalendar(Optional.fromNullable(calendar).or(Calendar.getInstance()));
         return p;
     }
 

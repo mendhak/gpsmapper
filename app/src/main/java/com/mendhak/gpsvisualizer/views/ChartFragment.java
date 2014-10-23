@@ -74,19 +74,27 @@ public class ChartFragment extends Fragment{
 
 
     private void applyToLineChart(ChartParameters params){
-        //Create the line with attributes and data
-        Line line = new Line(params.PointValues);
-        line.setColor(Utils.COLORS[0]);
-        line.setShape(ValueShape.CIRCLE);
-        line.setCubic(true);
-        line.setFilled(false);
-        line.setHasLabels(false);
-        line.setHasLabelsOnlyForSelected(true);
-        line.setHasLines(true);
-        line.setHasPoints(false);
+        //Create the lines with attributes and data
+        Line trackpointLine = new Line(params.TrackPointValues);
+        trackpointLine.setColor(Utils.COLORS[0]);
+        trackpointLine.setShape(ValueShape.CIRCLE);
+        trackpointLine.setCubic(true);
+        trackpointLine.setFilled(false);
+        trackpointLine.setHasLabels(false);
+        trackpointLine.setHasLabelsOnlyForSelected(true);
+        trackpointLine.setHasLines(true);
+        trackpointLine.setHasPoints(false);
+
+        Line waypointLine = new Line(params.WayPointValues);
+        waypointLine.setColor(Utils.COLOR_RED);
+        waypointLine.setShape(ValueShape.SQUARE);
+        waypointLine.setHasLabels(true);
+        waypointLine.setHasLabelsOnlyForSelected(true);
+        waypointLine.setHasLines(false);
+        waypointLine.setHasPoints(true);
 
         //Pass to data (a set of lines)
-        data = new LineChartData(Lists.newArrayList(line));
+        data = new LineChartData(Lists.newArrayList(trackpointLine, waypointLine));
 
         //XAxis
         Axis axisX = new Axis();
@@ -133,7 +141,8 @@ public class ChartFragment extends Fragment{
     private ChartParameters generateDataElevationOverDuration() {
         ChartParameters params = new ChartParameters();
 
-        params.PointValues = Lists.newLinkedList();
+        params.TrackPointValues = Lists.newLinkedList();
+        params.WayPointValues = Lists.newLinkedList();
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
@@ -141,8 +150,16 @@ public class ChartFragment extends Fragment{
             long elapsedMillis = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
                     track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
 
-            params.PointValues.add(new PointValue(elapsedMillis, track.getTrackPoints().get(i).getElevation()));
+            params.TrackPointValues.add(new PointValue(elapsedMillis, track.getTrackPoints().get(i).getElevation()));
             //params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
+        }
+
+        for(int i = 0; i< track.getWayPoints().size(); ++i){
+            params.WayPointValues.add(new PointValue(
+                    (track.getWayPoints().get(i).getCalendar().getTimeInMillis() -
+                    track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60),
+                    track.getWayPoints().get(i).getElevation()
+            ).setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
         }
 
 
@@ -177,6 +194,7 @@ public class ChartFragment extends Fragment{
         public float YAxisBottom;
         public List<AxisValue> XAxisValues;
         public List<AxisValue> YAxisValues;
-        public List<PointValue> PointValues;
+        public List<PointValue> TrackPointValues;
+        public List<PointValue> WayPointValues;
     }
 }

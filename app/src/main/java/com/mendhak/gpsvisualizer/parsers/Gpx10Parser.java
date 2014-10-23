@@ -81,7 +81,7 @@ public class Gpx10Parser {
                     }
 
                     if(qName.equalsIgnoreCase("name")){
-                        wayPoints.add(GpsPoint.wayPoint(lat, lon, sb.toString()));
+                        wayPoints.add(GpsPoint.wayPoint(lat, lon, sb.toString(), elevation, calendar));
                     }
 
                     if(qName.equalsIgnoreCase("time")){
