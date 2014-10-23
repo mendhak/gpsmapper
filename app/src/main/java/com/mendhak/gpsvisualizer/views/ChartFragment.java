@@ -13,7 +13,6 @@ import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.ProcessedData;
 
-import java.text.SimpleDateFormat;
 import java.util.List;
 
 import lecho.lib.hellocharts.model.Axis;
@@ -64,18 +63,15 @@ public class ChartFragment extends Fragment{
     }
 
     private void SetupChart() {
-
         track = ProcessedData.GetTrack();
         ChartParameters params = generateDataElevationOverDuration();
-        applyToChart(params);
-
+        applyToLineChart(params);
     }
 
 
-
-    private void applyToChart(ChartParameters params){
+    private void applyToLineChart(ChartParameters params){
         //Create the line with attributes and data
-        Line line = new Line(params.Values);
+        Line line = new Line(params.PointValues);
         line.setColor(Utils.COLORS[0]);
         line.setShape(ValueShape.CIRCLE);
         line.setCubic(true);
@@ -131,22 +127,20 @@ public class ChartFragment extends Fragment{
     private ChartParameters generateDataElevationOverDuration() {
         ChartParameters params = new ChartParameters();
 
-        params.Values = Lists.newLinkedList();
+        params.PointValues = Lists.newLinkedList();
         params.XAxisValues = Lists.newLinkedList();
+        params.YAxisValues = Lists.newLinkedList();
 
         for (int i = 0; i < track.getTrackPoints().size(); ++i) {
-            params.Values.add(new PointValue(i, track.getTrackPoints().get(i).getElevation()));
-
-            SimpleDateFormat timeFormat = new SimpleDateFormat("H:mm");
-            //String timeRepresentation =  timeFormat.format(track.getTrackPoints().get(i).getCalendar().getTime());
             long elapsedMillis = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
                     track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
 
-            params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
+            params.PointValues.add(new PointValue(elapsedMillis, track.getTrackPoints().get(i).getElevation()));
+            //params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
         }
 
 
-        params.XAxisName = "Duration (minutes)";
+        params.XAxisName = "Elapsed time (minutes)";
         params.YAxisName = "Elevation (m)";
 
         Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
@@ -176,6 +170,6 @@ public class ChartFragment extends Fragment{
         public float YAxisBottom;
         public List<AxisValue> XAxisValues;
         public List<AxisValue> YAxisValues;
-        public List<PointValue> Values;
+        public List<PointValue> PointValues;
     }
 }
