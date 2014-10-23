@@ -34,13 +34,7 @@ public class ChartFragment extends Fragment{
     private LineChartData data;
 
 
-    List<PointValue> values;
-    List<AxisValue> xAxisValues;
-    String xAxisName;
-    String yAxisName;
 
-    float yAxisTop;
-    float yAxisBottom;
 
 
 
@@ -71,30 +65,17 @@ public class ChartFragment extends Fragment{
 
     private void SetupChart() {
 
-        generateDataElevationOverDuration();
-        applyToChart();
+        track = ProcessedData.GetTrack();
+        ChartParameters params = generateDataElevationOverDuration();
+        applyToChart(params);
 
-        // Disable viewpirt recalculations, see toggleCubic() method for more info.
-        chart.setViewportCalculationEnabled(false);
-
-        chart.setValueSelectionEnabled(true);
-
-
-        resetViewport();
     }
 
-    private void resetViewport() {
-        final Viewport v = new Viewport(chart.getMaxViewport());
 
-        v.top = yAxisTop;
-        v.bottom = yAxisBottom;
 
-        chart.setMaxViewport(v);
-        chart.setCurrentViewport(v, false);
-    }
-
-    private void applyToChart(){
-        Line line = new Line(values);
+    private void applyToChart(ChartParameters params){
+        //Create the line with attributes and data
+        Line line = new Line(params.Values);
         line.setColor(Utils.COLORS[0]);
         line.setShape(ValueShape.CIRCLE);
         line.setCubic(true);
@@ -102,46 +83,71 @@ public class ChartFragment extends Fragment{
         line.setHasLabels(false);
         line.setHasLabelsOnlyForSelected(true);
         line.setHasLines(true);
-        line.setHasPoints(true);
+        line.setHasPoints(false);
 
+        //Pass to data (a set of lines)
         data = new LineChartData(Lists.newArrayList(line));
 
+        //XAxis
         Axis axisX = new Axis();
-        axisX.setValues(xAxisValues);
+        if(params.XAxisValues != null && params.XAxisValues.size() > 0){
+            axisX.setValues(params.XAxisValues);
+        }
 
+        //YAxis
         Axis axisY = new Axis().setHasLines(true);
+        if(params.YAxisValues != null && params.YAxisValues.size() > 0){
+            axisY.setValues(params.YAxisValues);
+        }
 
-        axisX.setName(xAxisName);
-        axisY.setName(yAxisName);
+        //Axis names
+        axisX.setName(params.XAxisName);
+        axisY.setName(params.YAxisName);
 
+        //Set axes
         data.setAxisXBottom(axisX);
         data.setAxisYLeft(axisY);
 
+        //Pass data to chart
         data.setBaseValue(Float.NEGATIVE_INFINITY);
         chart.setLineChartData(data);
+
+        // Disable viewport recalculations, see toggleCubic() method for more info.
+        chart.setViewportCalculationEnabled(false);
+
+        //Allow selecting points
+        chart.setValueSelectionEnabled(true);
+
+
+        //Set Y-axis top and bottom
+        final Viewport v = new Viewport(chart.getMaxViewport());
+        v.top = params.YAxisTop;
+        v.bottom = params.YAxisBottom;
+
+        chart.setMaxViewport(v);
+        chart.setCurrentViewport(v, true);
     }
 
-    private void generateDataElevationOverDuration() {
-        track = ProcessedData.GetTrack();
+    private ChartParameters generateDataElevationOverDuration() {
+        ChartParameters params = new ChartParameters();
 
-        values = Lists.newLinkedList();
-        xAxisValues = Lists.newLinkedList();
+        params.Values = Lists.newLinkedList();
+        params.XAxisValues = Lists.newLinkedList();
 
         for (int i = 0; i < track.getTrackPoints().size(); ++i) {
-            values.add(new PointValue(i, track.getTrackPoints().get(i).getElevation()));
+            params.Values.add(new PointValue(i, track.getTrackPoints().get(i).getElevation()));
 
             SimpleDateFormat timeFormat = new SimpleDateFormat("H:mm");
             //String timeRepresentation =  timeFormat.format(track.getTrackPoints().get(i).getCalendar().getTime());
             long elapsedMillis = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
                     track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
 
-            xAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
+            params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
         }
 
 
-
-        xAxisName = "Duration (min)";
-        yAxisName = "Elevation (m)";
+        params.XAxisName = "Duration (minutes)";
+        params.YAxisName = "Elevation (m)";
 
         Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
             @Override
@@ -157,8 +163,19 @@ public class ChartFragment extends Fragment{
             }
         };
 
-        yAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
-        yAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
+        params.YAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
+        params.YAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
 
+        return params;
+    }
+
+    private class ChartParameters {
+        public String XAxisName;
+        public String YAxisName;
+        public float YAxisTop;
+        public float YAxisBottom;
+        public List<AxisValue> XAxisValues;
+        public List<AxisValue> YAxisValues;
+        public List<PointValue> Values;
     }
 }
