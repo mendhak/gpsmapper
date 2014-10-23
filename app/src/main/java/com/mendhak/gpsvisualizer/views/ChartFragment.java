@@ -13,6 +13,7 @@ import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.ProcessedData;
 
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import lecho.lib.hellocharts.model.Axis;
@@ -122,6 +123,8 @@ public class ChartFragment extends Fragment{
 
         chart.setMaxViewport(v);
         chart.setCurrentViewport(v, true);
+
+
     }
 
     private ChartParameters generateDataElevationOverDuration() {
@@ -140,7 +143,8 @@ public class ChartFragment extends Fragment{
         }
 
 
-        params.XAxisName = "Elapsed time (minutes)";
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
+        params.XAxisName = "Minutes since " + sdf.format(track.getTrackPoints().get(0).getCalendar().getTime());
         params.YAxisName = "Elevation (m)";
 
         Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
