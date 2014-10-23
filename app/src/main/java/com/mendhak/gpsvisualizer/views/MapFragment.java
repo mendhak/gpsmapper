@@ -3,6 +3,9 @@ package com.mendhak.gpsvisualizer.views;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
@@ -53,6 +56,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         mapView = (MapView) rootView.findViewById(R.id.mapView);
         mapView.onCreate(savedInstanceState);
 
+        setHasOptionsMenu(true);
 
         //mapView.requestTransparentRegion(mapView);
 
@@ -99,6 +103,23 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         super.onLowMemory();
         mapView.onLowMemory();
     }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.maps, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        if (id == R.id.maptype_satellite) {
+
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
+    }
+
 
     private static boolean m_iAmVisible;
 
