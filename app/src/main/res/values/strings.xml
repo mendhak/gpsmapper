@@ -9,6 +9,10 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_maps">Map</string>
     <string name="action_elevationbytime">Elevation over time</string>
-    <string name="action_satellitemap">Satellite Map</string>
+    <string name="action_selectmaptype">Select Map Type</string>
+    <string name="mapType_normal">Normal</string>
+    <string name="mapType_satellite">Satellite</string>
+    <string name="mapType_hybrid">Hybrid</string>
+    <string name="mapType_terrain">Terrain</string>
 
 </resources>

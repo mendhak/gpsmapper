@@ -1,5 +1,7 @@
 package com.mendhak.gpsvisualizer.views;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -30,6 +32,13 @@ import java.util.List;
 
 public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedCallback {
 
+    MapView mapView;
+    private GoogleMap googleMap;
+    private View rootView;
+    private GpsTrack track;
+    private static boolean visibleToUser;
+    private static int mapType = GoogleMap.MAP_TYPE_NORMAL;
+
     public static MapFragment newInstance(int sectionNumber) {
         MapFragment fragment = new MapFragment();
         Bundle args = new Bundle();
@@ -41,10 +50,6 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     public MapFragment() {
     }
 
-    MapView mapView;
-    private GoogleMap googleMap;
-    private View rootView;
-    private GpsTrack track;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -114,14 +119,47 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         int id = item.getItemId();
         if (id == R.id.maptype_satellite) {
 
+            CharSequence colors[] = new CharSequence[] {getString(R.string.mapType_normal),
+                    getString(R.string.mapType_satellite),
+                    getString(R.string.mapType_hybrid),
+                    getString(R.string.mapType_terrain)};
+
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
+            builder.setTitle("Pick a map type");
+            builder.setItems(colors, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch(which){
+                        case 0:
+                            mapType = GoogleMap.MAP_TYPE_NORMAL;
+                            break;
+                        case 1:
+                            mapType = GoogleMap.MAP_TYPE_SATELLITE;
+                            break;
+                        case 2:
+                            mapType = GoogleMap.MAP_TYPE_HYBRID;
+                            break;
+                        case 3:
+                            mapType = GoogleMap.MAP_TYPE_TERRAIN;
+                            break;
+                        default:
+                            mapType = GoogleMap.MAP_TYPE_NORMAL;
+                            break;
+                    }
+                    RenderMap();
+                }
+            });
+            builder.show();
+
+
             return true;
         }
+
 
         return super.onOptionsItemSelected(item);
     }
 
-
-    private static boolean visibleToUser;
 
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
@@ -171,6 +209,8 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     private void RenderMap(){
 
         googleMap.clear();
+        googleMap.setMapType(mapType);
+
         track = ProcessedData.GetTrack();
 
         if(track.getTrackPoints().size() > 0){
