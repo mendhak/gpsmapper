@@ -46,7 +46,7 @@ public class Gpx10Parser {
                 float lon;
                 float elevation;
                 Calendar calendar;
-                double accummulatedDistance = 0;
+                double accumulatedDistance = 0;
 
 
                 StringBuilder sb;
@@ -79,14 +79,14 @@ public class Gpx10Parser {
 
                     if(qName.equalsIgnoreCase("trkpt")){
                         if(trackPoints.size()>0){
-                            accummulatedDistance += CalculateDistance(
+                            accumulatedDistance += CalculateDistance(
                                     lat,
                                     lon,
                                     trackPoints.get(trackPoints.size()-1).getLatitude(),
                                     trackPoints.get(trackPoints.size()-1).getLongitude()
                             );
                         }
-                        trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accummulatedDistance)));
+                        trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accumulatedDistance)));
                     }
 
                     if(qName.equalsIgnoreCase("name")){

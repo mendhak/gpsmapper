@@ -175,7 +175,7 @@ public class ChartFragment extends Fragment{
         for (int i = 0; i < track.getTrackPoints().size(); ++i) {
 
             params.TrackPointValues.add(new PointValue(
-                    track.getTrackPoints().get(i).getAccummulatedDistance(),
+                    track.getTrackPoints().get(i).getAccumulatedDistance(),
                     track.getTrackPoints().get(i).getElevation()));
             //params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
         }
@@ -190,13 +190,13 @@ public class ChartFragment extends Fragment{
                 }
             });
 
-            params.WayPointValues.add(new PointValue(correspondingTrackPoint.getAccummulatedDistance(), correspondingTrackPoint.getElevation())
+            params.WayPointValues.add(new PointValue(correspondingTrackPoint.getAccumulatedDistance(), correspondingTrackPoint.getElevation())
                     .setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
         }
 
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
-        params.XAxisName = "Accummulated Distance (m)";
+        params.XAxisName = "Accumulated Distance (m)";
         params.YAxisName = "Elevation (m)";
 
         Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
@@ -216,7 +216,7 @@ public class ChartFragment extends Fragment{
         params.YAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
         params.YAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
         params.XAxisLeft = 0;
-        params.XAxisRight = track.getTrackPoints().get(track.getTrackPoints().size()-1).getAccummulatedDistance()+50;
+        params.XAxisRight = track.getTrackPoints().get(track.getTrackPoints().size()-1).getAccumulatedDistance()+50;
 
         return params;
     }
