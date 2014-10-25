@@ -276,7 +276,7 @@ public class ChartFragment extends Fragment{
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.line_chart, menu);
+        inflater.inflate(R.menu.charts, menu);
     }
 
     @Override
