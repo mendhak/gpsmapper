@@ -1,6 +1,8 @@
 package com.mendhak.gpsvisualizer.views;
 
+import android.app.AlertDialog;
 import android.app.Fragment;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -9,6 +11,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 import com.mendhak.gpsvisualizer.R;
@@ -32,12 +36,13 @@ import lecho.lib.hellocharts.view.LineChartView;
 
 public class ChartFragment extends Fragment{
 
+    View rootView;
     private GpsTrack track;
     private LineChartView chart;
     private LineChartData data;
-
-
-
+    private static int chartType;
+    private static int ELEVATION_OVER_DURATION = 0;
+    private static int ELEVATION_OVER_DISTANCE = 1;
 
 
 
@@ -57,7 +62,7 @@ public class ChartFragment extends Fragment{
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_chart, container, false);
+        rootView = inflater.inflate(R.layout.fragment_chart, container, false);
 
         setHasOptionsMenu(true);
 
@@ -71,7 +76,16 @@ public class ChartFragment extends Fragment{
     private void SetupChart() {
         track = ProcessedData.GetTrack();
         if(track.getTrackPoints() != null && track.getTrackPoints().size() > 0){
-            ChartParameters params = generateDataElevationOverDuration();
+            ChartParameters params;
+
+            if(chartType == ELEVATION_OVER_DURATION){
+
+                params = generateDataElevationOverDuration();
+            }
+            else {
+                params = generateDataElevationOverDistance();
+            }
+
             applyToLineChart(params);
         }
 
@@ -136,11 +150,75 @@ public class ChartFragment extends Fragment{
         final Viewport v = new Viewport(chart.getMaxViewport());
         v.top = params.YAxisTop;
         v.bottom = params.YAxisBottom;
+        v.left = params.XAxisLeft;
+        v.right = params.XAxisRight;
 
         chart.setMaxViewport(v);
         chart.setCurrentViewport(v, true);
 
+        chart.startDataAnimation();
 
+
+    }
+
+
+    private ChartParameters generateDataElevationOverDistance() {
+        ChartParameters params = new ChartParameters();
+
+        params.TrackPointValues = Lists.newLinkedList();
+        params.WayPointValues = Lists.newLinkedList();
+        params.XAxisValues = Lists.newLinkedList();
+        params.YAxisValues = Lists.newLinkedList();
+
+
+
+        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
+
+            params.TrackPointValues.add(new PointValue(
+                    track.getTrackPoints().get(i).getAccummulatedDistance(),
+                    track.getTrackPoints().get(i).getElevation()));
+            //params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
+        }
+
+
+        for(int i = 0; i< track.getWayPoints().size(); ++i){
+            final int index = i;
+            GpsPoint correspondingTrackPoint = Iterables.find(track.getTrackPoints(), new Predicate<GpsPoint>() {
+                @Override
+                public boolean apply(GpsPoint input) {
+                    return input.getCalendar().getTimeInMillis() == track.getWayPoints().get(index).getCalendar().getTimeInMillis();
+                }
+            });
+
+            params.WayPointValues.add(new PointValue(correspondingTrackPoint.getAccummulatedDistance(), correspondingTrackPoint.getElevation())
+                    .setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
+        }
+
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
+        params.XAxisName = "Accummulated Distance (m)";
+        params.YAxisName = "Elevation (m)";
+
+        Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
+            @Override
+            public int compare(GpsPoint left, GpsPoint right) {
+
+                if(left.getElevation() > right.getElevation()){
+                    return 1;
+                }
+                if(left.getElevation() < right.getElevation()){
+                    return -1;
+                }
+                return 0;
+            }
+        };
+
+        params.YAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
+        params.YAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
+        params.XAxisLeft = 0;
+        params.XAxisRight = track.getTrackPoints().get(track.getTrackPoints().size()-1).getAccummulatedDistance()+50;
+
+        return params;
     }
 
     private ChartParameters generateDataElevationOverDuration() {
@@ -188,6 +266,9 @@ public class ChartFragment extends Fragment{
 
         params.YAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
         params.YAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
+        params.XAxisLeft = 0;
+        params.XAxisRight = ((track.getTrackPoints().get(track.getTrackPoints().size()-1).getCalendar().getTimeInMillis() -
+                track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60));
 
         return params;
     }
@@ -201,19 +282,49 @@ public class ChartFragment extends Fragment{
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.charttype_elevationovertime) {
+        if (id == R.id.charttype_selection) {
 
+            CharSequence colors[] = new CharSequence[] {"Elevation over time",
+                    "Elevation over distance"};
+
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
+            builder.setTitle("Pick a map type");
+            builder.setItems(colors, new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    switch(which){
+                        case 0:
+                            chartType = ELEVATION_OVER_DURATION;
+
+                            break;
+                        case 1:
+                            chartType = ELEVATION_OVER_DISTANCE;
+                            break;
+
+                        default:
+                            chartType = ELEVATION_OVER_DURATION;
+                            break;
+                    }
+                    SetupChart();
+                }
+            });
+            builder.show();
             return true;
         }
 
         return super.onOptionsItemSelected(item);
     }
 
+
+
     private class ChartParameters {
         public String XAxisName;
         public String YAxisName;
         public float YAxisTop;
         public float YAxisBottom;
+        public float XAxisLeft;
+        public float XAxisRight;
         public List<AxisValue> XAxisValues;
         public List<AxisValue> YAxisValues;
         public List<PointValue> TrackPointValues;

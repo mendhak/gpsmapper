@@ -117,7 +117,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        if (id == R.id.maptype_satellite) {
+        if (id == R.id.maptype_selection) {
 
             CharSequence colors[] = new CharSequence[] {getString(R.string.mapType_normal),
                     getString(R.string.mapType_satellite),
