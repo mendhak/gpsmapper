@@ -21,6 +21,7 @@ import com.mendhak.gpsvisualizer.views.BaseFragment;
 import com.mendhak.gpsvisualizer.views.ChartFragment;
 import com.mendhak.gpsvisualizer.views.MainImportFragment;
 import com.mendhak.gpsvisualizer.views.MapFragment;
+import com.mendhak.gpsvisualizer.views.StatsFragment;
 
 
 public class MainActivity extends Activity implements ActionBar.TabListener {
@@ -152,8 +153,11 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
             }
 
-            return ChartFragment.newInstance(position + 1);
+            if(position == 2){
+                return ChartFragment.newInstance(position + 1);
+            }
 
+            return StatsFragment.newInstance(position +1);
         }
 
         public Fragment getCurrentFragment() {
