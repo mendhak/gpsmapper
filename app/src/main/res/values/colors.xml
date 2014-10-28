@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="orange">#ffffdc7e</color>
-    <color name="grey">#ffd3d3d3</color>
-    <color name="green">#ff8dd304</color>
-    <color name="blue">#5a82e0ff</color>
-    <color name="yellow">#6efffbae</color>
-    <color name="red">#fff10800</color>
+    <color name="orange">#ccffdc7e</color>
+    <color name="grey">#ccd3d3d3</color>
+    <color name="green">#cc8dd304</color>
+    <color name="blue">#cc82e0ff</color>
+    <color name="yellow">#ccfffbae</color>
+    <color name="red">#ccf10800</color>
     <color name="list_item_pressed">#1A000000</color>
 </resources>

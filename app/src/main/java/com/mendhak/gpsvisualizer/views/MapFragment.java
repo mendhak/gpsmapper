@@ -122,7 +122,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         int id = item.getItemId();
         if (id == R.id.maptype_selection) {
 
-            CharSequence colors[] = new CharSequence[] {getString(R.string.mapType_normal),
+            CharSequence mapTypeNames[] = new CharSequence[] {getString(R.string.mapType_normal),
                     getString(R.string.mapType_satellite),
                     getString(R.string.mapType_hybrid),
                     getString(R.string.mapType_terrain)};
@@ -130,7 +130,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
 
             AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
             builder.setTitle("Pick a map type");
-            builder.setItems(colors, new DialogInterface.OnClickListener() {
+            builder.setItems(mapTypeNames, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     switch(which){
