@@ -100,7 +100,10 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     @Override
     public void onDestroy() {
         super.onDestroy();
-        mapView.onDestroy();
+        if(mapView != null){
+            mapView.onDestroy();
+        }
+
     }
 
     @Override
