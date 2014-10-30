@@ -4,6 +4,7 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -40,7 +41,8 @@ public class ChartFragment extends Fragment{
     private GpsTrack track;
     private LineChartView chart;
     private LineChartData data;
-    private static int chartType;
+    private static boolean visibleToUser;
+    private static int chartType = 0;
     private static int ELEVATION_OVER_DURATION = 0;
     private static int ELEVATION_OVER_DISTANCE = 1;
 
@@ -73,6 +75,20 @@ public class ChartFragment extends Fragment{
         return rootView;
     }
 
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        visibleToUser = isVisibleToUser;
+
+        if (visibleToUser) {
+            Log.d("GPSVisualizer", "Chart Fragment is now visible");
+
+            SetupChart();
+        } else {
+            Log.d("GPSVisualizer", "Chart Fragment is now invisible");
+        }
+    }
+
     private void SetupChart() {
         track = ProcessedData.GetTrack();
         if(track.getTrackPoints() != null && track.getTrackPoints().size() > 0){
@@ -93,6 +109,7 @@ public class ChartFragment extends Fragment{
 
 
     private void applyToLineChart(ChartParameters params){
+        Log.i("GPSVisualizer","applyToLineChart");
         //Create the lines with attributes and data
         Line trackpointLine = new Line(params.TrackPointValues);
         trackpointLine.setColor(Utils.COLORS[0]);

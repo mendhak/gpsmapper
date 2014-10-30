@@ -1,17 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:id="@+id/linear_layout_stats_fragment"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="@drawable/wallpaper_distance"
+    android:tileMode="repeat"
+    >
 
-    <ImageView
-        android:id="@+id/stats_background"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:scaleType="centerCrop"
-        >
-    </ImageView>
+    <!--<ImageView-->
+        <!--android:id="@+id/stats_background"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:scaleType="centerCrop"-->
+
+        <!-->-->
+    <!--</ImageView>-->
 
     <com.etsy.android.grid.StaggeredGridView
         xmlns:android="http://schemas.android.com/apk/res/android"
@@ -22,4 +26,4 @@
         app:item_margin="8dp"
         app:column_count="2" />
 
-</RelativeLayout>
+</LinearLayout>

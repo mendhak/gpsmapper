@@ -170,11 +170,11 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         visibleToUser = isVisibleToUser;
 
         if (visibleToUser) {
-            Log.d("GPSVisualizer", "this fragment is now visible");
+            Log.d("GPSVisualizer", "Map Fragment is now visible");
 
             SetupMap();
         } else {
-            Log.d("GPSVisualizer", "this fragment is now invisible");
+            Log.d("GPSVisualizer", "Map Fragment is now invisible");
         }
     }
 

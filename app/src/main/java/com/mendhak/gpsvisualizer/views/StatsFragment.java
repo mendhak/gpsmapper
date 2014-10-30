@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.*;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -30,6 +31,7 @@ public class StatsFragment extends Fragment {
 
     private View rootView;
     private GpsTrack track;
+    private boolean visibleToUser;
     private static int statType = StatType.ELEVATION;
 
     @Override
@@ -41,6 +43,20 @@ public class StatsFragment extends Fragment {
 
         DisplayStats();
         return rootView;
+    }
+
+    @Override
+    public void setUserVisibleHint(boolean isVisibleToUser) {
+        super.setUserVisibleHint(isVisibleToUser);
+        visibleToUser = isVisibleToUser;
+
+        if (visibleToUser) {
+            Log.d("GPSVisualizer", "Chart Fragment is now visible");
+
+            DisplayStats();
+        } else {
+            Log.d("GPSVisualizer", "Chart Fragment is now invisible");
+        }
     }
 
 
@@ -112,24 +128,29 @@ public class StatsFragment extends Fragment {
 
         track = ProcessedData.GetTrack();
 
-        ImageView background = (ImageView)rootView.findViewById(R.id.stats_background);
+//        ImageView background = (ImageView)rootView.findViewById(R.id.stats_background);
+        LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.linear_layout_stats_fragment);
         if(statType == StatType.DISTANCE){
-            background.setImageResource(R.drawable.wallpaper_distance);
+            //background.setImageResource(R.drawable.wallpaper_distance);
+            layout.setBackgroundResource(R.drawable.wallpaper_distance);
 
         }
         else if (statType == StatType.ELEVATION){
-            background.setImageResource(R.drawable.wallpaper_elevation);
+            //background.setImageResource(R.drawable.wallpaper_elevation);
+            layout.setBackgroundResource(R.drawable.wallpaper_elevation);
         }
         else if (statType == StatType.SPEED){
-            background.setImageResource(R.drawable.wallpaper_speed);
+            //background.setImageResource(R.drawable.wallpaper_speed);
+            layout.setBackgroundResource(R.drawable.wallpaper_speed);
         }
         else {
-            background.setImageResource(R.drawable.wallpaper_time);
+            //background.setImageResource(R.drawable.wallpaper_time);
+            layout.setBackgroundResource(R.drawable.wallpaper_time);
         }
 
 
-        StaggeredGridView mGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
-        StatsAdapter mAdapter = new StatsAdapter(rootView.getContext(), R.id.txt_line1);
+        StaggeredGridView staggeredGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
+        StatsAdapter statsAdapter = new StatsAdapter(rootView.getContext(), R.id.txt_line1);
 
         LayoutInflater inflater = (LayoutInflater) rootView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
@@ -146,12 +167,12 @@ public class StatsFragment extends Fragment {
 
         for(String data: dataSamples){
             //mAdapter.add(data);
-            mAdapter.add(data);
+            statsAdapter.add(data);
         }
 
 
 
-        mGridView.setAdapter(mAdapter);
+        staggeredGridView.setAdapter(statsAdapter);
 
         //if(statType!=StatType.ELEVATION){ mAdapter.clear(); mGridView.clearAnimation(); mGridView.setAdapter(mAdapter); }
 
