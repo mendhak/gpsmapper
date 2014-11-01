@@ -5,24 +5,27 @@ import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.graphics.Canvas;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
-import android.widget.ImageView;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
 import com.etsy.android.grid.StaggeredGridView;
-import com.google.android.gms.maps.GoogleMap;
+import com.google.common.base.Predicate;
+import com.google.common.collect.Collections2;
+import com.google.common.collect.Iterables;
+import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 import com.mendhak.gpsvisualizer.R;
 
+import com.mendhak.gpsvisualizer.common.GpsPoint;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.ProcessedData;
 import com.mendhak.gpsvisualizer.common.StatsAdapter;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -108,43 +111,103 @@ public class StatsFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    public ArrayList<String> generateSampleData() {
-        final ArrayList<String> data = new ArrayList<String>(44);
+    public List<StatPoint> generateElevationData(GpsTrack track) {
 
-        data.add("<h1><big>Minimum elevation</big></h1><br /> <h2>4m</h2>");
-        data.add("<h2>Maximum elevation</h2><br /> <h3>2817m</h3>");
-        data.add("<h2>Average elevation</h2><br /> <h3>1850.9m</h3>");
-        data.add("<h2>Total climbing</h2><br /> <h3>28900m</h3>");
-        data.add("<h2>Total descent</h2><br /> <h3>28820m</h3>");
-        data.add("<h2>Start elevation</h2><br /> <h3>1782.2m</h3>");
-        data.add("<h2>End elevation</h2><br /> <h3>1862m</h3>");
+        List<GpsPoint> trackPoints = track.getTrackPoints();
+        List<StatPoint> statPoints = Lists.newLinkedList();
 
-        return data;
+        //Elevation of 0m is a bad data point.  Remove these.
+        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
+            @Override
+            public boolean apply(GpsPoint input) {
+                return input.getElevation() != 0;
+            }
+        }));
+
+        if(trackPoints.size() == 0){ return statPoints; }
+
+
+        DecimalFormat df = new DecimalFormat("#.###");
+
+        double startElevation = Iterables.getFirst(trackPoints,null).getElevation();
+        double endElevation = Iterables.getLast(trackPoints, null).getElevation();
+        statPoints.add(new StatPoint("Start Elevation", df.format(startElevation) + "m" ));
+        statPoints.add(new StatPoint("End Elevation", df.format(endElevation) + "m" ));
+
+        Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
+            @Override
+            public int compare(GpsPoint left, GpsPoint right) {
+
+                if(left.getElevation() > right.getElevation()){
+                    return 1;
+                }
+                if(left.getElevation() < right.getElevation()){
+                    return -1;
+                }
+                return 0;
+            }
+        };
+
+        double minimumElevation = elevationOrdering.min(trackPoints).getElevation();
+        double maximumElevation = elevationOrdering.max(trackPoints).getElevation();
+
+        statPoints.add(new StatPoint("Minimum Elevation", df.format(minimumElevation) + "m" ));
+        statPoints.add(new StatPoint("Maximum Elevation", df.format(maximumElevation) + "m" ));
+
+
+        double avgElevation = 0;
+        for(GpsPoint p : trackPoints){
+            avgElevation += p.getElevation();
+        }
+
+        avgElevation = avgElevation/trackPoints.size();
+        statPoints.add(new StatPoint("Average Elevation",df.format(avgElevation) + "m" ));
+
+        double climbing = 0;
+        double descending = 0;
+
+        for(int i = 0; i < trackPoints.size(); i++){
+            if(i == 0) { continue; }
+
+            if(trackPoints.get(i).getElevation() < trackPoints.get(i-1).getElevation()){
+                descending += trackPoints.get(i-1).getElevation() - trackPoints.get(i).getElevation();
+            }
+
+            if(trackPoints.get(i).getElevation() > trackPoints.get(i-1).getElevation()){
+                climbing += trackPoints.get(i).getElevation() - trackPoints.get(i-1).getElevation();
+            }
+        }
+
+        statPoints.add(new StatPoint("Total Climbing", df.format(climbing) + "m"));
+        statPoints.add(new StatPoint("Total Descending", df.format(descending) + "m"));
+        statPoints.add(new StatPoint("Net Ascent", df.format(climbing - descending) + "m"));
+
+        return statPoints;
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN)
     private void DisplayStats() {
 
-
         track = ProcessedData.GetTrack();
+        if(Iterables.isEmpty(track.getTrackPoints())){
+            return;
+        }
 
-//        ImageView background = (ImageView)rootView.findViewById(R.id.stats_background);
+        List<StatPoint> statPoints = Lists.newLinkedList();
+
         LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.linear_layout_stats_fragment);
         if(statType == StatType.DISTANCE){
-            //background.setImageResource(R.drawable.wallpaper_distance);
             layout.setBackgroundResource(R.drawable.wallpaper_distance);
 
         }
         else if (statType == StatType.ELEVATION){
-            //background.setImageResource(R.drawable.wallpaper_elevation);
             layout.setBackgroundResource(R.drawable.wallpaper_elevation);
+            statPoints = generateElevationData(track);
         }
         else if (statType == StatType.SPEED){
-            //background.setImageResource(R.drawable.wallpaper_speed);
             layout.setBackgroundResource(R.drawable.wallpaper_speed);
         }
         else {
-            //background.setImageResource(R.drawable.wallpaper_time);
             layout.setBackgroundResource(R.drawable.wallpaper_time);
         }
 
@@ -154,55 +217,17 @@ public class StatsFragment extends Fragment {
 
         LayoutInflater inflater = (LayoutInflater) rootView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
-//        View header = inflater.inflate(R.layout.list_item_header_footer, null);
-//        View footer = inflater.inflate(R.layout.list_item_header_footer, null);
-//        TextView txtHeaderTitle = (TextView) header.findViewById(R.id.txt_title);
-//        TextView txtFooterTitle =  (TextView) footer.findViewById(R.id.txt_title);
-//        txtHeaderTitle.setText("THE HEADER!");
-//        txtFooterTitle.setText("THE FOOTER!");
-//        mGridView.addHeaderView(header);
-//        mGridView.addFooterView(footer);
+        statsAdapter.clear();
 
-        List<String> dataSamples = generateSampleData();
-
-        for(String data: dataSamples){
-            //mAdapter.add(data);
-            statsAdapter.add(data);
+        for(StatPoint stat: statPoints){
+            statsAdapter.add("<h1><big>" + stat.Title + "</big></h1><br /> <h2>" + stat.Value + "</h2>");
         }
 
+        //staggeredGridView.animate().
+        layout.clearAnimation();
 
-
+        staggeredGridView.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.fade));
         staggeredGridView.setAdapter(statsAdapter);
-
-        //if(statType!=StatType.ELEVATION){ mAdapter.clear(); mGridView.clearAnimation(); mGridView.setAdapter(mAdapter); }
-
-
-//        TableLayout table = (TableLayout)rootView.findViewById(R.id.table_stats);
-//
-//
-//        TableLayout.LayoutParams tableParams = new TableLayout.LayoutParams(TableLayout.LayoutParams.WRAP_CONTENT, TableLayout.LayoutParams.WRAP_CONTENT);
-//        TableRow.LayoutParams rowParams = new TableRow.LayoutParams(TableRow.LayoutParams.WRAP_CONTENT, TableRow.LayoutParams.WRAP_CONTENT);
-//
-//        TableLayout tableLayout = new TableLayout(rootView.getContext());
-//        tableLayout.setLayoutParams(tableParams);
-//
-//        TableRow tableRow = new TableRow(rootView.getContext());
-//        tableRow.setLayoutParams(tableParams);
-//
-//
-//
-//        TextView textView = new TextView(rootView.getContext());
-//        textView.setText("Minimum elevation:");
-//        textView.setLayoutParams(rowParams);
-//
-//        TextView textView2 = new TextView(rootView.getContext());
-//        textView2.setText("234");
-//        textView2.setLayoutParams(rowParams);
-//
-//        tableRow.addView(textView);
-//        tableRow.addView(textView2);
-//
-//        table.addView(tableRow);
     }
 
     public static StatsFragment newInstance(int sectionNumber) {
@@ -222,5 +247,14 @@ public class StatsFragment extends Fragment {
         public static final int SPEED = 1;
         public static final int TIME = 2;
         public static final int DISTANCE = 3;
+    }
+
+    private class StatPoint {
+        public StatPoint(String title, String value){
+            Title = title;
+            Value = value;
+        }
+        public String Title = "";
+        public String Value = "";
     }
 }
