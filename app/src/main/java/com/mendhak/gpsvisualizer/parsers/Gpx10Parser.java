@@ -44,7 +44,7 @@ public class Gpx10Parser {
 
                 float lat;
                 float lon;
-                float elevation;
+                Float elevation = null;
                 Float speed = null;
                 Calendar calendar;
                 double accumulatedDistance = 0;

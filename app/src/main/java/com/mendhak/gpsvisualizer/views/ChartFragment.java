@@ -248,24 +248,34 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
+        List<GpsPoint> trackPoints = track.getTrackPoints();
+
+        //Elevation of 0m is a bad data point.  Remove these.
+        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
+            @Override
+            public boolean apply(GpsPoint input) {
+                return input.getElevation().isPresent();
+            }
+        }));
+
+        for (int i = 0; i < trackPoints.size(); ++i) {
 
             params.TrackPointValues.add(new PointValue(
-                    track.getTrackPoints().get(i).getAccumulatedDistance(),
-                    track.getTrackPoints().get(i).getElevation()));
+                    trackPoints.get(i).getAccumulatedDistance(),
+                    trackPoints.get(i).getElevation().get()));
         }
 
 
         for(int i = 0; i< track.getWayPoints().size(); ++i){
             final int index = i;
-            GpsPoint correspondingTrackPoint = Iterables.find(track.getTrackPoints(), new Predicate<GpsPoint>() {
+            GpsPoint correspondingTrackPoint = Iterables.find(trackPoints, new Predicate<GpsPoint>() {
                 @Override
                 public boolean apply(GpsPoint input) {
                     return input.getCalendar().getTimeInMillis() == track.getWayPoints().get(index).getCalendar().getTimeInMillis();
                 }
             });
 
-            params.WayPointValues.add(new PointValue(correspondingTrackPoint.getAccumulatedDistance(), correspondingTrackPoint.getElevation())
+            params.WayPointValues.add(new PointValue(correspondingTrackPoint.getAccumulatedDistance(), correspondingTrackPoint.getElevation().get())
                     .setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
         }
 
@@ -278,20 +288,20 @@ public class ChartFragment extends Fragment{
             @Override
             public int compare(GpsPoint left, GpsPoint right) {
 
-                if(left.getElevation() > right.getElevation()){
+                if(left.getElevation().get() > right.getElevation().get()){
                     return 1;
                 }
-                if(left.getElevation() < right.getElevation()){
+                if(left.getElevation().get() < right.getElevation().get()){
                     return -1;
                 }
                 return 0;
             }
         };
 
-        params.YAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
-        params.YAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
+        params.YAxisTop = elevationOrdering.max(trackPoints).getElevation().get()+50;
+        params.YAxisBottom = elevationOrdering.min(trackPoints).getElevation().get()-50;
         params.XAxisLeft = 0;
-        params.XAxisRight = track.getTrackPoints().get(track.getTrackPoints().size()-1).getAccumulatedDistance()+50;
+        params.XAxisRight = trackPoints.get(trackPoints.size()-1).getAccumulatedDistance()+50;
 
         return params;
     }
@@ -358,55 +368,65 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
-            long elapsedMinutes = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
-                    track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
+        List<GpsPoint> trackPoints = track.getTrackPoints();
 
-            params.TrackPointValues.add(new PointValue(elapsedMinutes, track.getTrackPoints().get(i).getElevation()));
+        //Elevation of 0m is a bad data point.  Remove these.
+        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
+            @Override
+            public boolean apply(GpsPoint input) {
+                return input.getElevation().isPresent();
+            }
+        }));
+
+        for (int i = 0; i < trackPoints.size(); ++i) {
+            long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -
+                    trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
+
+            params.TrackPointValues.add(new PointValue(elapsedMinutes, trackPoints.get(i).getElevation().get()));
         }
 
         for(int i = 0; i< track.getWayPoints().size(); ++i){
 
             final int index = i;
-            GpsPoint correspondingTrackPoint = Iterables.find(track.getTrackPoints(), new Predicate<GpsPoint>() {
+            GpsPoint correspondingTrackPoint = Iterables.find(trackPoints, new Predicate<GpsPoint>() {
                 @Override
                 public boolean apply(GpsPoint input) {
                     return input.getCalendar().getTimeInMillis() == track.getWayPoints().get(index).getCalendar().getTimeInMillis();
                 }
             });
 
-            long elapsedMinutes = (correspondingTrackPoint.getCalendar().getTimeInMillis()-track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
+            long elapsedMinutes = (correspondingTrackPoint.getCalendar().getTimeInMillis()-trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
 
             params.WayPointValues.add(new PointValue(
                     elapsedMinutes,
-                    correspondingTrackPoint.getElevation()
+                    correspondingTrackPoint.getElevation().get()
             ).setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
         }
 
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
-        params.XAxisName = "Minutes since " + sdf.format(track.getTrackPoints().get(0).getCalendar().getTime());
+        params.XAxisName = "Minutes since " + sdf.format(trackPoints.get(0).getCalendar().getTime());
         params.YAxisName = "Elevation (m)";
 
         Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
             @Override
             public int compare(GpsPoint left, GpsPoint right) {
 
-                if(left.getElevation() > right.getElevation()){
+                if(left.getElevation().get() > right.getElevation().get()){
                     return 1;
                 }
-                if(left.getElevation() < right.getElevation()){
+                if(left.getElevation().get() < right.getElevation().get()){
                     return -1;
                 }
                 return 0;
             }
         };
 
-        params.YAxisTop = elevationOrdering.max(track.getTrackPoints()).getElevation()+50;
-        params.YAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
+        params.YAxisTop = elevationOrdering.max(trackPoints).getElevation().get()+50;
+        params.YAxisBottom = elevationOrdering.min(trackPoints).getElevation().get()-50;
         params.XAxisLeft = 0;
-        params.XAxisRight = ((track.getTrackPoints().get(track.getTrackPoints().size()-1).getCalendar().getTimeInMillis() -
-                track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60));
+        params.XAxisRight = ((trackPoints.get(trackPoints.size()-1).getCalendar().getTimeInMillis() -
+                trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60));
 
         return params;
     }

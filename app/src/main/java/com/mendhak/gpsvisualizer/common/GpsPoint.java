@@ -14,7 +14,7 @@ import java.util.Calendar;
 public class GpsPoint {
     private float latitude;
     private float longitude;
-    private float elevation;
+    private Optional<Float> elevation;
     private String description;
     private Calendar calendar;
     private float accumulatedDistance;
@@ -22,23 +22,23 @@ public class GpsPoint {
 
 
     public static GpsPoint from(float latitude, float longitude, @Nullable Float elevation, @Nullable Calendar calendar,
-                                @Nullable float accumulatedDistance, Float speed){
+                                @Nullable float accumulatedDistance,@Nullable Float speed){
         GpsPoint p = new GpsPoint();
         p.setLatitude(latitude);
         p.setLongitude(longitude);
-        p.setElevation(Optional.fromNullable(elevation).or(0f));
+        p.setElevation(Optional.fromNullable(elevation));
         p.setCalendar(Optional.fromNullable(calendar).or(Calendar.getInstance()));
         p.setAccumulatedDistance(Optional.fromNullable(accumulatedDistance).or(0f));
         p.setSpeed(Optional.fromNullable(speed));
         return p;
     }
 
-    public static GpsPoint wayPoint(float latitude, float longitude, String description,  @Nullable Float elevation, @Nullable Calendar calendar){
+    public static GpsPoint wayPoint(float latitude, float longitude, String description, @Nullable Float elevation, @Nullable Calendar calendar){
         GpsPoint p = new GpsPoint();
         p.setLatitude(latitude);
         p.setLongitude(longitude);
         p.setDescription(description);
-        p.setElevation(Optional.fromNullable(elevation).or(0f));
+        p.setElevation(Optional.fromNullable(elevation));
         p.setCalendar(Optional.fromNullable(calendar).or(Calendar.getInstance()));
         return p;
     }
@@ -59,11 +59,11 @@ public class GpsPoint {
         this.longitude = longitude;
     }
 
-    public float getElevation() {
+    public Optional<Float> getElevation() {
         return elevation;
     }
 
-    public void setElevation(float elevation) {
+    public void setElevation(Optional<Float> elevation) {
         this.elevation = elevation;
     }
 
