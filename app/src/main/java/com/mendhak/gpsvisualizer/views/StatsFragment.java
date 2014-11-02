@@ -133,7 +133,7 @@ public class StatsFragment extends Fragment {
         trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
             @Override
             public boolean apply(GpsPoint input) {
-                return input.getElevation() != 0;
+                return input.getElevation().isPresent();
             }
         }));
 
@@ -142,8 +142,8 @@ public class StatsFragment extends Fragment {
 
         DecimalFormat df = new DecimalFormat("#.###");
 
-        double startElevation = Iterables.getFirst(trackPoints,null).getElevation();
-        double endElevation = Iterables.getLast(trackPoints, null).getElevation();
+        double startElevation = Iterables.getFirst(trackPoints,null).getElevation().get();
+        double endElevation = Iterables.getLast(trackPoints, null).getElevation().get();
         statPoints.add(new StatPoint("Start Elevation", df.format(startElevation) + "m" ));
         statPoints.add(new StatPoint("End Elevation", df.format(endElevation) + "m" ));
 
@@ -151,18 +151,18 @@ public class StatsFragment extends Fragment {
             @Override
             public int compare(GpsPoint left, GpsPoint right) {
 
-                if(left.getElevation() > right.getElevation()){
+                if(left.getElevation().get() > right.getElevation().get()){
                     return 1;
                 }
-                if(left.getElevation() < right.getElevation()){
+                if(left.getElevation().get() < right.getElevation().get()){
                     return -1;
                 }
                 return 0;
             }
         };
 
-        double minimumElevation = elevationOrdering.min(trackPoints).getElevation();
-        double maximumElevation = elevationOrdering.max(trackPoints).getElevation();
+        double minimumElevation = elevationOrdering.min(trackPoints).getElevation().get();
+        double maximumElevation = elevationOrdering.max(trackPoints).getElevation().get();
 
         statPoints.add(new StatPoint("Minimum Elevation", df.format(minimumElevation) + "m" ));
         statPoints.add(new StatPoint("Maximum Elevation", df.format(maximumElevation) + "m" ));
@@ -170,7 +170,7 @@ public class StatsFragment extends Fragment {
 
         double avgElevation = 0;
         for(GpsPoint p : trackPoints){
-            avgElevation += p.getElevation();
+            avgElevation += p.getElevation().get();
         }
 
         avgElevation = avgElevation/trackPoints.size();
@@ -182,12 +182,12 @@ public class StatsFragment extends Fragment {
         for(int i = 0; i < trackPoints.size(); i++){
             if(i == 0) { continue; }
 
-            if(trackPoints.get(i).getElevation() < trackPoints.get(i-1).getElevation()){
-                descending += trackPoints.get(i-1).getElevation() - trackPoints.get(i).getElevation();
+            if(trackPoints.get(i).getElevation().get() < trackPoints.get(i-1).getElevation().get()){
+                descending += trackPoints.get(i-1).getElevation().get() - trackPoints.get(i).getElevation().get();
             }
 
-            if(trackPoints.get(i).getElevation() > trackPoints.get(i-1).getElevation()){
-                climbing += trackPoints.get(i).getElevation() - trackPoints.get(i-1).getElevation();
+            if(trackPoints.get(i).getElevation().get() > trackPoints.get(i-1).getElevation().get()){
+                climbing += trackPoints.get(i).getElevation().get() - trackPoints.get(i-1).getElevation().get();
             }
         }
 
