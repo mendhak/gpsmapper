@@ -125,12 +125,7 @@ public class StatsFragment extends Fragment {
         List<StatPoint> statPoints = Lists.newLinkedList();
 
         //Elevation of 0m is a bad data point.  Remove these.
-        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
-            @Override
-            public boolean apply(GpsPoint input) {
-                return input.getElevation().isPresent();
-            }
-        }));
+        trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
         if(trackPoints.size() == 0){ return statPoints; }
 

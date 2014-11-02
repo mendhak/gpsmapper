@@ -1,6 +1,8 @@
 package com.mendhak.gpsvisualizer.common;
 
 
+import com.google.common.base.Predicate;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Ordering;
 
@@ -68,5 +70,23 @@ public class GpsTrack {
             return 0;
         }
     };
+
+    public static Iterable<GpsPoint> ElevationFilter(List<GpsPoint> trackPoints){
+        return Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
+            @Override
+            public boolean apply(GpsPoint input) {
+                return input.getSpeed().isPresent();
+            }
+        });
+    }
+
+    public static Iterable<GpsPoint> SpeedFilter(List<GpsPoint> trackPoints){
+        return Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
+            @Override
+            public boolean apply(GpsPoint input) {
+                return input.getSpeed().isPresent();
+            }
+        });
+    }
 
 }

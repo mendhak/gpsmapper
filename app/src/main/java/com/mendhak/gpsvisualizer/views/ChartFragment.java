@@ -194,12 +194,7 @@ public class ChartFragment extends Fragment{
         List<GpsPoint> trackPoints = track.getTrackPoints();
 
         //Elevation of 0m is a bad data point.  Remove these.
-        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
-            @Override
-            public boolean apply(GpsPoint input) {
-                return input.getSpeed().isPresent();
-            }
-        }));
+        trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
 
         if(trackPoints.size() == 0) { return params; }
 
@@ -235,12 +230,7 @@ public class ChartFragment extends Fragment{
         List<GpsPoint> trackPoints = track.getTrackPoints();
 
         //Elevation of 0m is a bad data point.  Remove these.
-        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
-            @Override
-            public boolean apply(GpsPoint input) {
-                return input.getElevation().isPresent();
-            }
-        }));
+        trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
         for (int i = 0; i < trackPoints.size(); ++i) {
 
@@ -287,12 +277,7 @@ public class ChartFragment extends Fragment{
         List<GpsPoint> trackPoints = track.getTrackPoints();
 
         //No speed is a bad data point.  Remove these.
-        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
-            @Override
-            public boolean apply(GpsPoint input) {
-                return input.getSpeed().isPresent();
-            }
-        }));
+        trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
 
         if(trackPoints.size() == 0) { return params; }
 
@@ -327,12 +312,7 @@ public class ChartFragment extends Fragment{
         List<GpsPoint> trackPoints = track.getTrackPoints();
 
         //Elevation of 0m is a bad data point.  Remove these.
-        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
-            @Override
-            public boolean apply(GpsPoint input) {
-                return input.getElevation().isPresent();
-            }
-        }));
+        trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
         for (int i = 0; i < trackPoints.size(); ++i) {
             long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -
