@@ -42,9 +42,8 @@ public class ChartFragment extends Fragment{
     private LineChartView chart;
     private LineChartData data;
     private static boolean visibleToUser;
-    private static int chartType = 0;
-    private static int ELEVATION_OVER_DURATION = 0;
-    private static int ELEVATION_OVER_DISTANCE = 1;
+    private static int chartType = ChartType.ELEVATION_OVER_DURATION;
+
 
 
 
@@ -94,7 +93,7 @@ public class ChartFragment extends Fragment{
         if(track.getTrackPoints() != null && track.getTrackPoints().size() > 0){
             ChartParameters params;
 
-            if(chartType == ELEVATION_OVER_DURATION){
+            if(chartType == ChartType.ELEVATION_OVER_DURATION){
 
                 params = generateDataElevationOverDuration();
             }
@@ -109,7 +108,6 @@ public class ChartFragment extends Fragment{
 
 
     private void applyToLineChart(ChartParameters params){
-        Log.i("GPSVisualizer","applyToLineChart");
         //Create the lines with attributes and data
         Line trackpointLine = new Line(params.TrackPointValues);
         trackpointLine.setColor(Utils.COLORS[0]);
@@ -194,7 +192,6 @@ public class ChartFragment extends Fragment{
             params.TrackPointValues.add(new PointValue(
                     track.getTrackPoints().get(i).getAccumulatedDistance(),
                     track.getTrackPoints().get(i).getElevation()));
-            //params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
         }
 
 
@@ -247,18 +244,27 @@ public class ChartFragment extends Fragment{
         params.YAxisValues = Lists.newLinkedList();
 
         for (int i = 0; i < track.getTrackPoints().size(); ++i) {
-            long elapsedMillis = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
+            long elapsedMinutes = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
                     track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
 
-            params.TrackPointValues.add(new PointValue(elapsedMillis, track.getTrackPoints().get(i).getElevation()));
-            //params.XAxisValues.add(new AxisValue(i, String.valueOf(elapsedMillis).toCharArray()));
+            params.TrackPointValues.add(new PointValue(elapsedMinutes, track.getTrackPoints().get(i).getElevation()));
         }
 
         for(int i = 0; i< track.getWayPoints().size(); ++i){
+
+            final int index = i;
+            GpsPoint correspondingTrackPoint = Iterables.find(track.getTrackPoints(), new Predicate<GpsPoint>() {
+                @Override
+                public boolean apply(GpsPoint input) {
+                    return input.getCalendar().getTimeInMillis() == track.getWayPoints().get(index).getCalendar().getTimeInMillis();
+                }
+            });
+
+            long elapsedMinutes = (correspondingTrackPoint.getCalendar().getTimeInMillis()-track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
+
             params.WayPointValues.add(new PointValue(
-                    (track.getWayPoints().get(i).getCalendar().getTimeInMillis() -
-                    track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60),
-                    track.getWayPoints().get(i).getElevation()
+                    elapsedMinutes,
+                    correspondingTrackPoint.getElevation()
             ).setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
         }
 
@@ -312,15 +318,15 @@ public class ChartFragment extends Fragment{
                 public void onClick(DialogInterface dialog, int which) {
                     switch(which){
                         case 0:
-                            chartType = ELEVATION_OVER_DURATION;
+                            chartType = ChartType.ELEVATION_OVER_DURATION;
 
                             break;
                         case 1:
-                            chartType = ELEVATION_OVER_DISTANCE;
+                            chartType = ChartType.ELEVATION_OVER_DISTANCE;
                             break;
 
                         default:
-                            chartType = ELEVATION_OVER_DURATION;
+                            chartType = ChartType.ELEVATION_OVER_DURATION;
                             break;
                     }
                     SetupChart();
@@ -334,6 +340,10 @@ public class ChartFragment extends Fragment{
     }
 
 
+    private static class ChartType {
+        public static int ELEVATION_OVER_DURATION = 0;
+        public static int ELEVATION_OVER_DISTANCE = 1;
+    }
 
     private class ChartParameters {
         public String XAxisName;
