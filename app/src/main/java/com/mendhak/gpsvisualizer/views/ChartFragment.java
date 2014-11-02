@@ -40,7 +40,7 @@ public class ChartFragment extends Fragment{
     private LineChartView chart;
     private LineChartData data;
     private static boolean visibleToUser;
-    private static ChartType chartType = ChartType.SPEED_OVER_DURATION;
+    private static ChartType chartType = ChartType.ELEVATION_OVER_DURATION;
 
     public static ChartFragment newInstance(int sectionNumber) {
         ChartFragment fragment = new ChartFragment();

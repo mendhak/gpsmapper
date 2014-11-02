@@ -102,7 +102,6 @@ public class StatsFragment extends Fragment {
             return true;
         }
 
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -110,10 +109,51 @@ public class StatsFragment extends Fragment {
         List<GpsPoint> trackPoints = track.getTrackPoints();
         List<StatPoint> statPoints = Lists.newLinkedList();
 
-        for(GpsPoint p: trackPoints){
+        trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
 
+        if(trackPoints.isEmpty()) { return statPoints; }
 
+        DecimalFormat df = new DecimalFormat("#.###");
+
+        double minimumSpeed = GpsTrack.SpeedOrdering.min(trackPoints).getSpeed().get();
+        double maximumSpeed = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed().get();
+        statPoints.add(new StatPoint("Minimum speed", df.format(minimumSpeed) + "m/s"));
+        statPoints.add(new StatPoint("Maximum speed", df.format(maximumSpeed) + "m/s"));
+
+        double averageSpeed = 0;
+        for(GpsPoint p : trackPoints){
+            averageSpeed += p.getSpeed().get();
         }
+        averageSpeed = averageSpeed/trackPoints.size();
+        statPoints.add(new StatPoint("Average speed", df.format(averageSpeed) + "m/s"));
+
+        //Now also remove points without elevation
+        trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
+        double averageClimbingSpeed = 0;
+        int averageClimbingCount = 0;
+        double averageDescendingSpeed = 0;
+        int averageDescendingCount = 0;
+
+        for(int i = 0; i < trackPoints.size(); i++){
+            if(i == 0) { continue; }
+
+            if(trackPoints.get(i).getElevation().get() < trackPoints.get(i-1).getElevation().get()){
+                averageDescendingCount++;
+                averageDescendingSpeed += trackPoints.get(i-1).getSpeed().get();
+            }
+
+            if(trackPoints.get(i).getElevation().get() > trackPoints.get(i-1).getElevation().get()){
+                averageClimbingCount++;
+                averageClimbingSpeed += trackPoints.get(i).getSpeed().get();
+            }
+        }
+
+        averageDescendingSpeed = averageDescendingSpeed/averageDescendingCount;
+        averageClimbingSpeed = averageClimbingSpeed/averageClimbingCount;
+
+        statPoints.add(new StatPoint("Climbing speed", df.format(averageClimbingSpeed) +"m/s"));
+        statPoints.add(new StatPoint("Descent speed", df.format(averageDescendingSpeed) +"m/s"));
+
 
         return statPoints;
 
