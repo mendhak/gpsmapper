@@ -16,5 +16,6 @@
     <string name="mapType_terrain">Terrain</string>
     <string name="action_selectcharttype">Select Chart Type</string>
     <string name="action_selectstattype">Select category</string>
+    <string name="import_introduction">Use the buttons below to import GPX files</string>
 
 </resources>

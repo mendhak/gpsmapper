@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 
+import android.widget.TextView;
 import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.IDataImportListener;
@@ -24,6 +25,7 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
 
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final Integer ACTION_FILE_PICKER=41792;
+    private View rootView;
 
 
     public static MainImportFragment newInstance(int sectionNumber) {
@@ -41,7 +43,7 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        View rootView = inflater.inflate(R.layout.fragment_main, container, false);
+        rootView = inflater.inflate(R.layout.fragment_import, container, false);
 
         Button btnImport = (Button)rootView.findViewById(R.id.btnImportData);
         btnImport.setOnClickListener(this);
@@ -84,6 +86,8 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
 
         Gpx10Parser parser = new Gpx10Parser();
         parser.Parse(gpsFile.getPath(), this);
+        TextView txtIntroduction = (TextView)rootView.findViewById(R.id.section_label);
+        txtIntroduction.setText("Imported " + gpsFile.getName());
 
     }
 
