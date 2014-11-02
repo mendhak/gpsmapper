@@ -111,6 +111,19 @@ public class StatsFragment extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
+    public List<StatPoint> generateSpeedData(GpsTrack track){
+        List<GpsPoint> trackPoints = track.getTrackPoints();
+        List<StatPoint> statPoints = Lists.newLinkedList();
+
+        for(GpsPoint p: trackPoints){
+
+
+        }
+
+        return statPoints;
+
+    }
+
     public List<StatPoint> generateElevationData(GpsTrack track) {
 
         List<GpsPoint> trackPoints = track.getTrackPoints();
@@ -206,6 +219,7 @@ public class StatsFragment extends Fragment {
         }
         else if (statType == StatType.SPEED){
             layout.setBackgroundResource(R.drawable.wallpaper_speed);
+            statPoints = generateSpeedData(track);
         }
         else {
             layout.setBackgroundResource(R.drawable.wallpaper_time);

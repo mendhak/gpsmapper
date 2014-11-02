@@ -3,6 +3,7 @@ package com.mendhak.gpsvisualizer.common;
 
 import android.support.annotation.Nullable;
 
+import android.util.Log;
 import com.google.common.base.Optional;
 
 import java.util.Calendar;
@@ -17,18 +18,18 @@ public class GpsPoint {
     private String description;
     private Calendar calendar;
     private float accumulatedDistance;
-    private float speed;
+    private Optional<Float> speed;
 
 
     public static GpsPoint from(float latitude, float longitude, @Nullable Float elevation, @Nullable Calendar calendar,
-                                @Nullable float accumulatedDistance, @Nullable float speed){
+                                @Nullable float accumulatedDistance, Float speed){
         GpsPoint p = new GpsPoint();
         p.setLatitude(latitude);
         p.setLongitude(longitude);
         p.setElevation(Optional.fromNullable(elevation).or(0f));
         p.setCalendar(Optional.fromNullable(calendar).or(Calendar.getInstance()));
         p.setAccumulatedDistance(Optional.fromNullable(accumulatedDistance).or(0f));
-        p.setSpeed(Optional.fromNullable(speed).or(0f));
+        p.setSpeed(Optional.fromNullable(speed));
         return p;
     }
 
@@ -90,11 +91,11 @@ public class GpsPoint {
         this.accumulatedDistance = accumulatedDistance;
     }
 
-    public float getSpeed() {
+    public Optional<Float> getSpeed() {
         return speed;
     }
 
-    public void setSpeed(float speed) {
+    public void setSpeed(Optional<Float> speed) {
         this.speed = speed;
     }
 }

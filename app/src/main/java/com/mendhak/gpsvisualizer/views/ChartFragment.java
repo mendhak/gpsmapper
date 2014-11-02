@@ -38,7 +38,6 @@ import lecho.lib.hellocharts.view.LineChartView;
 public class ChartFragment extends Fragment{
 
     View rootView;
-    private GpsTrack track;
     private LineChartView chart;
     private LineChartData data;
     private static boolean visibleToUser;
@@ -89,25 +88,27 @@ public class ChartFragment extends Fragment{
     }
 
     private void SetupChart() {
-        track = ProcessedData.GetTrack();
+
+        GpsTrack track = ProcessedData.GetTrack();
+
         if(track.getTrackPoints() != null && track.getTrackPoints().size() > 0){
             ChartParameters params;
 
             if(chartType == ChartType.ELEVATION_OVER_DURATION){
 
-                params = generateDataElevationOverDuration();
+                params = generateDataElevationOverDuration(track);
             }
             else if (chartType == ChartType.ELEVATION_OVER_DISTANCE) {
-                params = generateDataElevationOverDistance();
+                params = generateDataElevationOverDistance(track);
             }
             else if (chartType == ChartType.SPEED_OVER_DISTANCE){
-                params = generateDataSpeedOverDistance();
+                params = generateDataSpeedOverDistance(track);
             }
             else if (chartType == ChartType.SPEED_OVER_DURATION){
-                params = generateDataSpeedOverDuration();
+                params = generateDataSpeedOverDuration(track);
             }
             else {
-                params = generateDataElevationOverDuration();
+                params = generateDataElevationOverDuration(track);
             }
 
             applyToLineChart(params);
@@ -186,7 +187,7 @@ public class ChartFragment extends Fragment{
     }
 
 
-    private ChartParameters generateDataSpeedOverDistance() {
+    private ChartParameters generateDataSpeedOverDistance(GpsTrack track) {
         ChartParameters params = new ChartParameters();
 
         params.TrackPointValues = Lists.newLinkedList();
@@ -194,11 +195,23 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
+        List<GpsPoint> trackPoints = track.getTrackPoints();
+
+        //Elevation of 0m is a bad data point.  Remove these.
+        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
+            @Override
+            public boolean apply(GpsPoint input) {
+                return input.getSpeed().isPresent();
+            }
+        }));
+
+        if(trackPoints.size() == 0) { return params; }
+
+        for (int i = 0; i < trackPoints.size(); ++i) {
 
             params.TrackPointValues.add(new PointValue(
-                    track.getTrackPoints().get(i).getAccumulatedDistance(),
-                    track.getTrackPoints().get(i).getSpeed()));
+                    trackPoints.get(i).getAccumulatedDistance(),
+                    trackPoints.get(i).getSpeed().get()));
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
@@ -209,25 +222,25 @@ public class ChartFragment extends Fragment{
             @Override
             public int compare(GpsPoint left, GpsPoint right) {
 
-                if(left.getSpeed() > right.getSpeed()){
+                if(left.getSpeed().get() > right.getSpeed().get()){
                     return 1;
                 }
-                if(left.getSpeed() < right.getSpeed()){
+                if(left.getSpeed().get() < right.getSpeed().get()){
                     return -1;
                 }
                 return 0;
             }
         };
 
-        params.YAxisTop = speedOrdering.max(track.getTrackPoints()).getSpeed()+5;
-        params.YAxisBottom = speedOrdering.min(track.getTrackPoints()).getSpeed();
+        params.YAxisTop = speedOrdering.max(trackPoints).getSpeed().get()+5;
+        params.YAxisBottom = speedOrdering.min(trackPoints).getSpeed().get();
         params.XAxisLeft = 0;
-        params.XAxisRight = track.getTrackPoints().get(track.getTrackPoints().size()-1).getAccumulatedDistance()+50;
+        params.XAxisRight = trackPoints.get(trackPoints.size()-1).getAccumulatedDistance()+50;
 
         return params;
     }
 
-    private ChartParameters generateDataElevationOverDistance() {
+    private ChartParameters generateDataElevationOverDistance(final GpsTrack track) {
         ChartParameters params = new ChartParameters();
 
         params.TrackPointValues = Lists.newLinkedList();
@@ -283,7 +296,7 @@ public class ChartFragment extends Fragment{
         return params;
     }
 
-    private ChartParameters generateDataSpeedOverDuration() {
+    private ChartParameters generateDataSpeedOverDuration(GpsTrack track) {
         ChartParameters params = new ChartParameters();
 
         params.TrackPointValues = Lists.newLinkedList();
@@ -291,41 +304,53 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
-            long elapsedMinutes = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
-                    track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
+        List<GpsPoint> trackPoints = track.getTrackPoints();
 
-            params.TrackPointValues.add(new PointValue(elapsedMinutes, track.getTrackPoints().get(i).getSpeed()));
+        //No speed is a bad data point.  Remove these.
+        trackPoints = Lists.newArrayList(Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
+            @Override
+            public boolean apply(GpsPoint input) {
+                return input.getSpeed().isPresent();
+            }
+        }));
+
+        if(trackPoints.size() == 0) { return params; }
+
+        for (int i = 0; i < trackPoints.size(); ++i) {
+            long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -
+                    trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
+
+            params.TrackPointValues.add(new PointValue(elapsedMinutes, trackPoints.get(i).getSpeed().get()));
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
-        params.XAxisName = "Minutes since " + sdf.format(track.getTrackPoints().get(0).getCalendar().getTime());
+        params.XAxisName = "Minutes since " + sdf.format(trackPoints.get(0).getCalendar().getTime());
         params.YAxisName = "Speed (m/s)";
 
         Ordering<GpsPoint> speedOrdering = new Ordering<GpsPoint>() {
             @Override
             public int compare(GpsPoint left, GpsPoint right) {
 
-                if(left.getSpeed() > right.getSpeed()){
+                if(left.getSpeed().get() > right.getSpeed().get()){
                     return 1;
                 }
-                if(left.getSpeed() < right.getSpeed()){
+                if(left.getSpeed().get() < right.getSpeed().get()){
                     return -1;
                 }
                 return 0;
             }
         };
 
-        params.YAxisTop = speedOrdering.max(track.getTrackPoints()).getSpeed()+5;
-        params.YAxisBottom = speedOrdering.min(track.getTrackPoints()).getSpeed();
+        params.YAxisTop = speedOrdering.max(trackPoints).getSpeed().get()+5;
+        params.YAxisBottom = speedOrdering.min(trackPoints).getSpeed().get();
         params.XAxisLeft = 0;
-        params.XAxisRight = ((track.getTrackPoints().get(track.getTrackPoints().size()-1).getCalendar().getTimeInMillis() -
-                track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60));
+        params.XAxisRight = ((trackPoints.get(trackPoints.size()-1).getCalendar().getTimeInMillis() -
+                trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60));
 
         return params;
     }
 
-    private ChartParameters generateDataElevationOverDuration() {
+    private ChartParameters generateDataElevationOverDuration(final GpsTrack track) {
         ChartParameters params = new ChartParameters();
 
         params.TrackPointValues = Lists.newLinkedList();

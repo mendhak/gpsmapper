@@ -92,7 +92,7 @@ public class StatsAdapter extends ArrayAdapter<String> {
         if (ratio == 0) {
             ratio = getRandomHeightRatio();
             sPositionHeightRatios.append(position, ratio);
-            Log.d(TAG, "getPositionRatio:" + position + " ratio:" + ratio);
+//            Log.d(TAG, "getPositionRatio:" + position + " ratio:" + ratio);
         }
         return ratio;
     }
