@@ -14,16 +14,11 @@ import android.widget.LinearLayout;
 
 import com.etsy.android.grid.StaggeredGridView;
 import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
-import com.google.common.collect.Ordering;
 import com.mendhak.gpsvisualizer.R;
 
-import com.mendhak.gpsvisualizer.common.GpsPoint;
-import com.mendhak.gpsvisualizer.common.GpsTrack;
-import com.mendhak.gpsvisualizer.common.ProcessedData;
-import com.mendhak.gpsvisualizer.common.StatsAdapter;
+import com.mendhak.gpsvisualizer.common.*;
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
@@ -147,22 +142,8 @@ public class StatsFragment extends Fragment {
         statPoints.add(new StatPoint("Start Elevation", df.format(startElevation) + "m" ));
         statPoints.add(new StatPoint("End Elevation", df.format(endElevation) + "m" ));
 
-        Ordering<GpsPoint> elevationOrdering = new Ordering<GpsPoint>() {
-            @Override
-            public int compare(GpsPoint left, GpsPoint right) {
-
-                if(left.getElevation().get() > right.getElevation().get()){
-                    return 1;
-                }
-                if(left.getElevation().get() < right.getElevation().get()){
-                    return -1;
-                }
-                return 0;
-            }
-        };
-
-        double minimumElevation = elevationOrdering.min(trackPoints).getElevation().get();
-        double maximumElevation = elevationOrdering.max(trackPoints).getElevation().get();
+        double minimumElevation = GpsTrack.ElevationOrdering.min(trackPoints).getElevation().get();
+        double maximumElevation = GpsTrack.ElevationOrdering.max(trackPoints).getElevation().get();
 
         statPoints.add(new StatPoint("Minimum Elevation", df.format(minimumElevation) + "m" ));
         statPoints.add(new StatPoint("Maximum Elevation", df.format(maximumElevation) + "m" ));

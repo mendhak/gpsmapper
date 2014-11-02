@@ -2,6 +2,7 @@ package com.mendhak.gpsvisualizer.common;
 
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Ordering;
 
 import java.util.List;
 
@@ -39,5 +40,33 @@ public class GpsTrack {
         this.wayPoints = wayPoints;
     }
 
+
+    public static Ordering<GpsPoint> ElevationOrdering = new Ordering<GpsPoint>() {
+        @Override
+        public int compare(GpsPoint left, GpsPoint right) {
+
+            if(left.getElevation().get() > right.getElevation().get()){
+                return 1;
+            }
+            if(left.getElevation().get() < right.getElevation().get()){
+                return -1;
+            }
+            return 0;
+        }
+    };
+
+    public static Ordering<GpsPoint> SpeedOrdering = new Ordering<GpsPoint>() {
+        @Override
+        public int compare(GpsPoint left, GpsPoint right) {
+
+            if(left.getSpeed().get() > right.getSpeed().get()){
+                return 1;
+            }
+            if(left.getSpeed().get() < right.getSpeed().get()){
+                return -1;
+            }
+            return 0;
+        }
+    };
 
 }
