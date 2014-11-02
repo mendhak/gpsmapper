@@ -3,7 +3,9 @@ package com.mendhak.gpsvisualizer.views;
 import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.DialogInterface;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -12,6 +14,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.view.animation.AnimationUtils;
+import android.widget.TextView;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -23,13 +27,7 @@ import com.mendhak.gpsvisualizer.common.ProcessedData;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import lecho.lib.hellocharts.model.Axis;
-import lecho.lib.hellocharts.model.AxisValue;
-import lecho.lib.hellocharts.model.Line;
-import lecho.lib.hellocharts.model.LineChartData;
-import lecho.lib.hellocharts.model.PointValue;
-import lecho.lib.hellocharts.model.ValueShape;
-import lecho.lib.hellocharts.model.Viewport;
+import lecho.lib.hellocharts.model.*;
 import lecho.lib.hellocharts.util.Utils;
 import lecho.lib.hellocharts.view.LineChartView;
 
@@ -91,20 +89,24 @@ public class ChartFragment extends Fragment{
             ChartParameters params;
 
             if(chartType == ChartType.ELEVATION_OVER_DURATION){
-
                 params = generateDataElevationOverDuration(track);
+                SetChartTitle("Elevation/Time");
             }
             else if (chartType == ChartType.ELEVATION_OVER_DISTANCE) {
                 params = generateDataElevationOverDistance(track);
+                SetChartTitle("Elevation/Distance");
             }
             else if (chartType == ChartType.SPEED_OVER_DISTANCE){
                 params = generateDataSpeedOverDistance(track);
+                SetChartTitle("Speed/Distance");
             }
             else if (chartType == ChartType.SPEED_OVER_DURATION){
                 params = generateDataSpeedOverDuration(track);
+                SetChartTitle("Speed/Time");
             }
             else {
                 params = generateDataElevationOverDuration(track);
+                SetChartTitle("Elevation/Time");
             }
 
             applyToLineChart(params);
@@ -150,7 +152,9 @@ public class ChartFragment extends Fragment{
 
         //Axis names
         axisX.setName(params.XAxisName);
+        axisX.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
         axisY.setName(params.YAxisName);
+        axisY.setTypeface(Typeface.defaultFromStyle(Typeface.BOLD));
 
         //Set axes
         data.setAxisXBottom(axisX);
@@ -178,7 +182,7 @@ public class ChartFragment extends Fragment{
         chart.setCurrentViewport(v, true);
 
         chart.startDataAnimation();
-
+        chart.setAnimation(AnimationUtils.loadAnimation(getActivity(),R.anim.fade));
 
     }
 
@@ -404,6 +408,11 @@ public class ChartFragment extends Fragment{
         return super.onOptionsItemSelected(item);
     }
 
+    private void SetChartTitle(String title){
+        TextView tvTitle = (TextView) rootView.findViewById(R.id.txtChartTitle);
+        tvTitle.setText(title);
+
+    }
 
     private enum ChartType {
        ELEVATION_OVER_DURATION,
