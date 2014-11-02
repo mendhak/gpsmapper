@@ -80,7 +80,7 @@ public class Gpx10Parser {
                                        String qName) throws SAXException {
 
                     if(qName.equalsIgnoreCase("trkpt")){
-                        if(trackPoints.size()>0){
+                        if(!trackPoints.isEmpty()){
                             accumulatedDistance += CalculateDistance(
                                     lat,
                                     lon,

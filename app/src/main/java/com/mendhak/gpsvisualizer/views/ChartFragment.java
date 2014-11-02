@@ -138,13 +138,13 @@ public class ChartFragment extends Fragment{
 
         //XAxis
         Axis axisX = new Axis();
-        if(params.XAxisValues != null && params.XAxisValues.size() > 0){
+        if(!params.XAxisValues.isEmpty()){
             axisX.setValues(params.XAxisValues);
         }
 
         //YAxis
         Axis axisY = new Axis().setHasLines(true);
-        if(params.YAxisValues != null && params.YAxisValues.size() > 0){
+        if(!params.YAxisValues.isEmpty()){
             axisY.setValues(params.YAxisValues);
         }
 
@@ -196,7 +196,7 @@ public class ChartFragment extends Fragment{
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
 
-        if(trackPoints.size() == 0) { return params; }
+        if(trackPoints.isEmpty()) { return params; }
 
         for (int i = 0; i < trackPoints.size(); ++i) {
 
@@ -279,7 +279,7 @@ public class ChartFragment extends Fragment{
         //No speed is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
 
-        if(trackPoints.size() == 0) { return params; }
+        if(trackPoints.isEmpty()) { return params; }
 
         for (int i = 0; i < trackPoints.size(); ++i) {
             long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -

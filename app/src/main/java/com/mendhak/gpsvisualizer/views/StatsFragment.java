@@ -127,7 +127,7 @@ public class StatsFragment extends Fragment {
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
-        if(trackPoints.size() == 0){ return statPoints; }
+        if(trackPoints.isEmpty()){ return statPoints; }
 
 
         DecimalFormat df = new DecimalFormat("#.###");
