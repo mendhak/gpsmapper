@@ -10,14 +10,10 @@ import android.app.FragmentTransaction;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
-import com.mendhak.gpsvisualizer.common.GpsTrack;
-import com.mendhak.gpsvisualizer.common.ProcessedData;
-import com.mendhak.gpsvisualizer.views.BaseFragment;
 import com.mendhak.gpsvisualizer.views.ChartFragment;
 import com.mendhak.gpsvisualizer.views.MainImportFragment;
 import com.mendhak.gpsvisualizer.views.MapFragment;
@@ -34,13 +30,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
      * may be best to switch to a
      * {@link android.support.v13.app.FragmentStatePagerAdapter}.
      */
-    SectionsPagerAdapter mSectionsPagerAdapter;
+    SectionsPagerAdapter sectionsPagerAdapter;
 
 
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager mViewPager;
+    ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,17 +49,17 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
+        sectionsPagerAdapter = new SectionsPagerAdapter(getFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.pager);
-        mViewPager.setAdapter(mSectionsPagerAdapter);
-        mViewPager.setOffscreenPageLimit(4);
+        viewPager = (ViewPager) findViewById(R.id.pager);
+        viewPager.setAdapter(sectionsPagerAdapter);
+        viewPager.setOffscreenPageLimit(4);
 
         // When swiping between different sections, select the corresponding
         // tab. We can also use ActionBar.Tab#select() to do this if we have
         // a reference to the Tab.
-        mViewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
+        viewPager.setOnPageChangeListener(new ViewPager.SimpleOnPageChangeListener() {
             @Override
             public void onPageSelected(int position) {
                 actionBar.setSelectedNavigationItem(position);
@@ -71,22 +67,17 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         });
 
         // For each of the sections in the app, add a tab to the action bar.
-        for (int i = 0; i < mSectionsPagerAdapter.getCount(); i++) {
+        for (int i = 0; i < sectionsPagerAdapter.getCount(); i++) {
             // Create a tab with text corresponding to the page title defined by
             // the adapter. Also specify this Activity object, which implements
             // the TabListener interface, as the callback (listener) for when
             // this tab is selected.
             actionBar.addTab(
                     actionBar.newTab()
-                            .setText(mSectionsPagerAdapter.getPageTitle(i))
+                            .setText(sectionsPagerAdapter.getPageTitle(i))
                             .setTabListener(this));
         }
 
-        //Fragment currentFragment = getFragmentManager().findFragmentByTag("android:switcher:" + R.id.pager + ":" + mViewPager.getCurrentItem());
-        Fragment currentFragment = mSectionsPagerAdapter.getCurrentFragment();
-        if(currentFragment instanceof BaseFragment){
-            //((BaseFragment)currentFragment).SetGpsPoints(flatTrack);
-        }
     }
 
 
@@ -115,7 +106,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     public void onTabSelected(ActionBar.Tab tab, FragmentTransaction fragmentTransaction) {
         // When the given tab is selected, switch to the corresponding page in
         // the ViewPager.
-        mViewPager.setCurrentItem(tab.getPosition());
+        viewPager.setCurrentItem(tab.getPosition());
     }
 
     @Override
@@ -133,7 +124,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
      */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
-        private Fragment mCurrentFragment;
+        private Fragment currentFragment;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
@@ -162,13 +153,13 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         }
 
         public Fragment getCurrentFragment() {
-            return mCurrentFragment;
+            return currentFragment;
         }
 
         @Override
         public void setPrimaryItem(ViewGroup container, int position, Object object) {
             if (getCurrentFragment() != object) {
-                mCurrentFragment = ((Fragment) object);
+                currentFragment = ((Fragment) object);
             }
             super.setPrimaryItem(container, position, object);
         }

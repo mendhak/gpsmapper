@@ -30,7 +30,7 @@ public class StatsFragment extends Fragment {
     private View rootView;
     private GpsTrack track;
     private boolean visibleToUser;
-    private static int statType = StatType.ELEVATION;
+    private static StatType statType = StatType.ELEVATION;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -272,11 +272,11 @@ public class StatsFragment extends Fragment {
 
     }
 
-    private static class StatType {
-        public static final int ELEVATION = 0;
-        public static final int SPEED = 1;
-        public static final int TIME = 2;
-        public static final int DISTANCE = 3;
+    private enum StatType {
+         ELEVATION ,
+         SPEED ,
+         TIME ,
+         DISTANCE
     }
 
     private class StatPoint {

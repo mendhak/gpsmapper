@@ -423,13 +423,13 @@ public class ChartFragment extends Fragment{
         int id = item.getItemId();
         if (id == R.id.charttype_selection) {
 
-            CharSequence colors[] = new CharSequence[] {"Elevation over time",
+            CharSequence chartTypeSelection[] = new CharSequence[] {"Elevation over time",
                     "Elevation over distance", "Speed over distance", "Speed over time", "Distance over time"};
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
             builder.setTitle("Pick a map type");
-            builder.setItems(colors, new DialogInterface.OnClickListener() {
+            builder.setItems(chartTypeSelection, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
                     switch(which){
