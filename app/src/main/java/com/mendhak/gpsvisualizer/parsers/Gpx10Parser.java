@@ -45,6 +45,7 @@ public class Gpx10Parser {
                 float lat;
                 float lon;
                 float elevation;
+                float speed;
                 Calendar calendar;
                 double accumulatedDistance = 0;
 
@@ -67,6 +68,7 @@ public class Gpx10Parser {
                     }
 
                     if(qName.equalsIgnoreCase("ele")
+                            || qName.equalsIgnoreCase("speed")
                             || qName.equalsIgnoreCase("time")
                             || qName.equalsIgnoreCase("name") ){
                         parseIt=true;
@@ -86,7 +88,7 @@ public class Gpx10Parser {
                                     trackPoints.get(trackPoints.size()-1).getLongitude()
                             );
                         }
-                        trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accumulatedDistance)));
+                        trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accumulatedDistance), new Float(speed)));
                     }
 
                     if(qName.equalsIgnoreCase("name")){
@@ -105,6 +107,10 @@ public class Gpx10Parser {
 
                     if(qName.equalsIgnoreCase("ele")){
                         elevation = Float.valueOf(sb.toString());
+                    }
+
+                    if(qName.equalsIgnoreCase("speed")){
+                        speed = Float.valueOf(sb.toString());
                     }
                 }
 

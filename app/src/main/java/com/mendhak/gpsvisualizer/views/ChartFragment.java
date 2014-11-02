@@ -42,7 +42,7 @@ public class ChartFragment extends Fragment{
     private LineChartView chart;
     private LineChartData data;
     private static boolean visibleToUser;
-    private static int chartType = ChartType.ELEVATION_OVER_DURATION;
+    private static int chartType = ChartType.SPEED_OVER_DURATION;
 
 
 
@@ -99,6 +99,12 @@ public class ChartFragment extends Fragment{
             }
             else if (chartType == ChartType.ELEVATION_OVER_DISTANCE) {
                 params = generateDataElevationOverDistance();
+            }
+            else if (chartType == ChartType.SPEED_OVER_DISTANCE){
+                params = generateDataSpeedOverDistance();
+            }
+            else if (chartType == ChartType.SPEED_OVER_DURATION){
+                params = generateDataSpeedOverDuration();
             }
             else {
                 params = generateDataElevationOverDuration();
@@ -180,7 +186,7 @@ public class ChartFragment extends Fragment{
     }
 
 
-    private ChartParameters generateDataElevationOverDistance() {
+    private ChartParameters generateDataSpeedOverDistance() {
         ChartParameters params = new ChartParameters();
 
         params.TrackPointValues = Lists.newLinkedList();
@@ -188,7 +194,46 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
+        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
 
+            params.TrackPointValues.add(new PointValue(
+                    track.getTrackPoints().get(i).getAccumulatedDistance(),
+                    track.getTrackPoints().get(i).getSpeed()));
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
+        params.XAxisName = "Accumulated Distance (m)";
+        params.YAxisName = "Speed (m/s)";
+
+        Ordering<GpsPoint> speedOrdering = new Ordering<GpsPoint>() {
+            @Override
+            public int compare(GpsPoint left, GpsPoint right) {
+
+                if(left.getSpeed() > right.getSpeed()){
+                    return 1;
+                }
+                if(left.getSpeed() < right.getSpeed()){
+                    return -1;
+                }
+                return 0;
+            }
+        };
+
+        params.YAxisTop = speedOrdering.max(track.getTrackPoints()).getSpeed()+5;
+        params.YAxisBottom = speedOrdering.min(track.getTrackPoints()).getSpeed();
+        params.XAxisLeft = 0;
+        params.XAxisRight = track.getTrackPoints().get(track.getTrackPoints().size()-1).getAccumulatedDistance()+50;
+
+        return params;
+    }
+
+    private ChartParameters generateDataElevationOverDistance() {
+        ChartParameters params = new ChartParameters();
+
+        params.TrackPointValues = Lists.newLinkedList();
+        params.WayPointValues = Lists.newLinkedList();
+        params.XAxisValues = Lists.newLinkedList();
+        params.YAxisValues = Lists.newLinkedList();
 
         for (int i = 0; i < track.getTrackPoints().size(); ++i) {
 
@@ -234,6 +279,48 @@ public class ChartFragment extends Fragment{
         params.YAxisBottom = elevationOrdering.min(track.getTrackPoints()).getElevation()-50;
         params.XAxisLeft = 0;
         params.XAxisRight = track.getTrackPoints().get(track.getTrackPoints().size()-1).getAccumulatedDistance()+50;
+
+        return params;
+    }
+
+    private ChartParameters generateDataSpeedOverDuration() {
+        ChartParameters params = new ChartParameters();
+
+        params.TrackPointValues = Lists.newLinkedList();
+        params.WayPointValues = Lists.newLinkedList();
+        params.XAxisValues = Lists.newLinkedList();
+        params.YAxisValues = Lists.newLinkedList();
+
+        for (int i = 0; i < track.getTrackPoints().size(); ++i) {
+            long elapsedMinutes = (track.getTrackPoints().get(i).getCalendar().getTimeInMillis() -
+                    track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60);
+
+            params.TrackPointValues.add(new PointValue(elapsedMinutes, track.getTrackPoints().get(i).getSpeed()));
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
+        params.XAxisName = "Minutes since " + sdf.format(track.getTrackPoints().get(0).getCalendar().getTime());
+        params.YAxisName = "Speed (m/s)";
+
+        Ordering<GpsPoint> speedOrdering = new Ordering<GpsPoint>() {
+            @Override
+            public int compare(GpsPoint left, GpsPoint right) {
+
+                if(left.getSpeed() > right.getSpeed()){
+                    return 1;
+                }
+                if(left.getSpeed() < right.getSpeed()){
+                    return -1;
+                }
+                return 0;
+            }
+        };
+
+        params.YAxisTop = speedOrdering.max(track.getTrackPoints()).getSpeed()+5;
+        params.YAxisBottom = speedOrdering.min(track.getTrackPoints()).getSpeed();
+        params.XAxisLeft = 0;
+        params.XAxisRight = ((track.getTrackPoints().get(track.getTrackPoints().size()-1).getCalendar().getTimeInMillis() -
+                track.getTrackPoints().get(0).getCalendar().getTimeInMillis())/(1000*60));
 
         return params;
     }
@@ -311,7 +398,7 @@ public class ChartFragment extends Fragment{
         if (id == R.id.charttype_selection) {
 
             CharSequence colors[] = new CharSequence[] {"Elevation over time",
-                    "Elevation over distance"};
+                    "Elevation over distance", "Speed over distance", "Speed over time"};
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
@@ -326,6 +413,14 @@ public class ChartFragment extends Fragment{
                             break;
                         case 1:
                             chartType = ChartType.ELEVATION_OVER_DISTANCE;
+                            break;
+
+                        case 2:
+                            chartType = ChartType.SPEED_OVER_DISTANCE;
+                            break;
+
+                        case 3:
+                            chartType = ChartType.SPEED_OVER_DURATION;
                             break;
 
                         default:
@@ -346,6 +441,8 @@ public class ChartFragment extends Fragment{
     private static class ChartType {
         public static int ELEVATION_OVER_DURATION = 0;
         public static int ELEVATION_OVER_DISTANCE = 1;
+        public static int SPEED_OVER_DISTANCE = 2;
+        public static int SPEED_OVER_DURATION = 3;
     }
 
     private class ChartParameters {

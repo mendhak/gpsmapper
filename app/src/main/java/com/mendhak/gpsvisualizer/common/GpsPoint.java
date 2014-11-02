@@ -17,15 +17,18 @@ public class GpsPoint {
     private String description;
     private Calendar calendar;
     private float accumulatedDistance;
+    private float speed;
 
 
-    public static GpsPoint from(float latitude, float longitude, @Nullable Float elevation, @Nullable Calendar calendar, @Nullable float accumulatedDistance){
+    public static GpsPoint from(float latitude, float longitude, @Nullable Float elevation, @Nullable Calendar calendar,
+                                @Nullable float accumulatedDistance, @Nullable float speed){
         GpsPoint p = new GpsPoint();
         p.setLatitude(latitude);
         p.setLongitude(longitude);
         p.setElevation(Optional.fromNullable(elevation).or(0f));
         p.setCalendar(Optional.fromNullable(calendar).or(Calendar.getInstance()));
         p.setAccumulatedDistance(Optional.fromNullable(accumulatedDistance).or(0f));
+        p.setSpeed(Optional.fromNullable(speed).or(0f));
         return p;
     }
 
@@ -85,5 +88,13 @@ public class GpsPoint {
 
     public void setAccumulatedDistance(float accumulatedDistance) {
         this.accumulatedDistance = accumulatedDistance;
+    }
+
+    public float getSpeed() {
+        return speed;
+    }
+
+    public void setSpeed(float speed) {
+        this.speed = speed;
     }
 }
