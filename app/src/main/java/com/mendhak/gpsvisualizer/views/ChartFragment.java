@@ -97,8 +97,11 @@ public class ChartFragment extends Fragment{
 
                 params = generateDataElevationOverDuration();
             }
-            else {
+            else if (chartType == ChartType.ELEVATION_OVER_DISTANCE) {
                 params = generateDataElevationOverDistance();
+            }
+            else {
+                params = generateDataElevationOverDuration();
             }
 
             applyToLineChart(params);
