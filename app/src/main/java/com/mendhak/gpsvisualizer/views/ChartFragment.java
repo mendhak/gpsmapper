@@ -104,6 +104,10 @@ public class ChartFragment extends Fragment{
                 params = generateDataSpeedOverDuration(track);
                 SetChartTitle("Speed/Time");
             }
+            else if(chartType == ChartType.DISTANCE_OVER_TIME){
+                params = generateDataDistanceOverTime(track);
+                SetChartTitle("Distance/Time");
+            }
             else {
                 params = generateDataElevationOverDuration(track);
                 SetChartTitle("Elevation/Time");
@@ -270,6 +274,57 @@ public class ChartFragment extends Fragment{
         return params;
     }
 
+    private ChartParameters generateDataDistanceOverTime(final GpsTrack track){
+        ChartParameters params = new ChartParameters();
+
+        params.TrackPointValues = Lists.newLinkedList();
+        params.WayPointValues = Lists.newLinkedList();
+        params.XAxisValues = Lists.newLinkedList();
+        params.YAxisValues = Lists.newLinkedList();
+
+        List<GpsPoint> trackPoints = track.getTrackPoints();
+        if(trackPoints.isEmpty()) { return params; }
+
+        for (int i = 0; i < trackPoints.size(); ++i) {
+            long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -
+                    trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
+
+            params.TrackPointValues.add(new PointValue(elapsedMinutes, trackPoints.get(i).getAccumulatedDistance()));
+        }
+
+        for(int i = 0; i< track.getWayPoints().size(); ++i){
+
+            final int index = i;
+            GpsPoint correspondingTrackPoint = Iterables.find(trackPoints, new Predicate<GpsPoint>() {
+                @Override
+                public boolean apply(GpsPoint input) {
+                    return input.getCalendar().getTimeInMillis() == track.getWayPoints().get(index).getCalendar().getTimeInMillis();
+                }
+            });
+
+            long elapsedMinutes = (correspondingTrackPoint.getCalendar().getTimeInMillis()-trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
+
+            params.WayPointValues.add(new PointValue(
+                    elapsedMinutes,
+                    correspondingTrackPoint.getAccumulatedDistance()
+            ).setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
+        }
+
+        SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
+        params.XAxisName = "Minutes since " + sdf.format(trackPoints.get(0).getCalendar().getTime());
+        params.YAxisName = "Distance (m)";
+
+        params.YAxisTop = Iterables.getLast(trackPoints).getAccumulatedDistance()+100;
+        params.YAxisBottom = Iterables.getFirst(trackPoints,null).getAccumulatedDistance();
+        params.XAxisLeft = 0;
+        params.XAxisRight = ((trackPoints.get(trackPoints.size() - 1).getCalendar().getTimeInMillis() -
+                trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60));
+
+        return params;
+
+    }
+
+
     private ChartParameters generateDataSpeedOverDuration(GpsTrack track) {
         ChartParameters params = new ChartParameters();
 
@@ -369,7 +424,7 @@ public class ChartFragment extends Fragment{
         if (id == R.id.charttype_selection) {
 
             CharSequence colors[] = new CharSequence[] {"Elevation over time",
-                    "Elevation over distance", "Speed over distance", "Speed over time"};
+                    "Elevation over distance", "Speed over distance", "Speed over time", "Distance over time"};
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
@@ -392,6 +447,10 @@ public class ChartFragment extends Fragment{
 
                         case 3:
                             chartType = ChartType.SPEED_OVER_DURATION;
+                            break;
+
+                        case 4:
+                            chartType = ChartType.DISTANCE_OVER_TIME;
                             break;
 
                         default:
@@ -418,7 +477,8 @@ public class ChartFragment extends Fragment{
        ELEVATION_OVER_DURATION,
        ELEVATION_OVER_DISTANCE,
        SPEED_OVER_DISTANCE,
-       SPEED_OVER_DURATION
+       SPEED_OVER_DURATION,
+       DISTANCE_OVER_TIME
     }
 
     private class ChartParameters {
