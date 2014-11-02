@@ -1,10 +1,17 @@
 package com.mendhak.gpsvisualizer.views;
 
+import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.content.Intent;
+import android.content.IntentSender;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,6 +19,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 
 import android.widget.TextView;
+import com.google.android.gms.drive.Drive;
 import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.IDataImportListener;
@@ -40,6 +48,7 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
     public MainImportFragment() {
     }
 
+    @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -47,6 +56,8 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
 
         Button btnImport = (Button)rootView.findViewById(R.id.btnImportData);
         btnImport.setOnClickListener(this);
+
+        btnImport.setCompoundDrawablesWithIntrinsicBounds(R.drawable.esfileexplorer, 0, 0, 0 );
 
         return rootView;
     }
@@ -90,6 +101,8 @@ public  class MainImportFragment extends Fragment implements View.OnClickListene
         txtIntroduction.setText("Imported " + gpsFile.getName());
 
     }
+
+
 
 
     /**
