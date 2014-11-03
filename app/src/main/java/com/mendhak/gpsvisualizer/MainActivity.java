@@ -7,13 +7,17 @@ import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
+import com.google.android.gms.drive.DriveId;
+import com.google.android.gms.drive.OpenFileActivityBuilder;
 import com.mendhak.gpsvisualizer.views.ChartFragment;
 import com.mendhak.gpsvisualizer.views.MainImportFragment;
 import com.mendhak.gpsvisualizer.views.MapFragment;
@@ -36,7 +40,16 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
     /**
      * The {@link ViewPager} that will host the section contents.
      */
-    ViewPager viewPager;
+    public ViewPager viewPager;
+
+
+    /** DRIVE_OPEN Intent action. */
+    private static final String ACTION_DRIVE_OPEN = "com.google.android.apps.drive.DRIVE_OPEN";
+    /** Drive file ID key. */
+    private static final String EXTRA_FILE_ID = "resourceId";
+
+    /** Drive file ID. */
+    private String mFileId;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,10 +91,19 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
                             .setTabListener(this));
         }
 
+        // Get the action that triggered the intent filter for this Activity
+        final Intent intent = getIntent();
+        final String action = intent.getAction();
+
+        // Make sure the Action is DRIVE_OPEN.
+        if (ACTION_DRIVE_OPEN.equals(action)) {
+            // Get the Drive file ID.
+            mFileId = intent.getStringExtra(EXTRA_FILE_ID);
+            Log.d("GPSVisualizer", "Received intent for file: " + mFileId);
+
+        }
+
     }
-
-
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -187,6 +209,14 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         }
     }
 
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if(requestCode == MainImportFragment.GDRIVE_REQUEST_CODE_OPENER && resultCode == RESULT_OK ){
+            DriveId driveId = data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
+            MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
+            mainImportFragment.OnGoogleDriveFileSelected(driveId);
+        }
+    }
 
 
 
