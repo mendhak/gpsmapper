@@ -16,8 +16,10 @@ import android.net.Uri;
 import android.preference.PreferenceFragment;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
+import android.support.v13.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.util.SparseArray;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
@@ -121,8 +123,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener, IDa
         if(action.equals(Intent.ACTION_VIEW)){
 
             Log.d("GPSVisualizer", intent.getData().getPath());
-            MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
-            mainImportFragment.ProcessUserGpsFile(intent.getData());
+            MainImportFragment mainImportFragment = (MainImportFragment) sectionsPagerAdapter.getRegisteredFragment(0);
+            mainImportFragment.OnFileSelected(intent.getData());
+//            MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
+//            mainImportFragment.ProcessUserGpsFile(intent.getData());
         }
 
     }
@@ -166,12 +170,29 @@ public class MainActivity extends Activity implements ActionBar.TabListener, IDa
      * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
      * one of the sections/tabs/pages.
      */
-    public class SectionsPagerAdapter extends FragmentPagerAdapter {
-
+    public class SectionsPagerAdapter extends FragmentStatePagerAdapter {
+        SparseArray<Fragment> registeredFragments = new SparseArray<Fragment>();
         private Fragment currentFragment;
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
+        }
+
+        @Override
+        public Object instantiateItem(ViewGroup container, int position) {
+            Fragment fragment = (Fragment) super.instantiateItem(container, position);
+            registeredFragments.put(position, fragment);
+            return fragment;
+        }
+
+        @Override
+        public void destroyItem(ViewGroup container, int position, Object object) {
+            registeredFragments.remove(position);
+            super.destroyItem(container, position, object);
+        }
+
+        public Fragment getRegisteredFragment(int position) {
+            return registeredFragments.get(position);
         }
 
         @Override
@@ -251,8 +272,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener, IDa
 
             DriveId driveId = data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
 
-            MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
+            MainImportFragment mainImportFragment = (MainImportFragment) sectionsPagerAdapter.getRegisteredFragment(0);
             mainImportFragment.OnGoogleDriveFileSelected(driveId);
+//            MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
+//            mainImportFragment.OnGoogleDriveFileSelected(driveId);
         }
     }
 
