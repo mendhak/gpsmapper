@@ -73,6 +73,16 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     }
 
     @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+
+        Uri pendingFile = dataImportListener.GetPendingExternalFile();
+        if(pendingFile != null){
+            OnFileSelected(pendingFile);
+        }
+    }
+
+    @Override
     public void onClick(View view) {
         switch (view.getId()) {
             case R.id.btnImportData:

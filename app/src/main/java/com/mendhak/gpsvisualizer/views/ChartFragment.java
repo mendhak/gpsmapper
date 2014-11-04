@@ -373,6 +373,8 @@ public class ChartFragment extends Fragment{
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
+        if(trackPoints.isEmpty()) { return params; }
+
         for (int i = 0; i < trackPoints.size(); ++i) {
             long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -
                     trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);

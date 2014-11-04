@@ -56,6 +56,8 @@ public class MainActivity extends Activity implements ActionBar.TabListener, IDa
     public ViewPager viewPager;
 
 
+    private Uri externalFile;
+
     /** DRIVE_OPEN Intent action. */
     private static final String ACTION_DRIVE_OPEN = "com.google.android.apps.drive.DRIVE_OPEN";
     /** Drive file ID key. */
@@ -123,8 +125,9 @@ public class MainActivity extends Activity implements ActionBar.TabListener, IDa
         if(action.equals(Intent.ACTION_VIEW)){
 
             Log.d("GPSVisualizer", intent.getData().getPath());
-            MainImportFragment mainImportFragment = (MainImportFragment) sectionsPagerAdapter.getRegisteredFragment(0);
-            mainImportFragment.OnFileSelected(intent.getData());
+            externalFile = intent.getData();
+//            MainImportFragment mainImportFragment = (MainImportFragment) sectionsPagerAdapter.getRegisteredFragment(0);
+//            mainImportFragment.OnFileSelected(intent.getData());
 //            MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
 //            mainImportFragment.ProcessUserGpsFile(intent.getData());
         }
@@ -290,6 +293,10 @@ public class MainActivity extends Activity implements ActionBar.TabListener, IDa
         ProcessedData.SetTrack(track);
     }
 
+    @Override
+    public Uri GetPendingExternalFile() {
+        return externalFile;
+    }
 
 
 }
