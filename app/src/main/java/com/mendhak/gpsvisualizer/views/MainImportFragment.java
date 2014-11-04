@@ -26,6 +26,7 @@ import com.mendhak.gpsvisualizer.MainActivity;
 import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.IDataImportListener;
+import com.mendhak.gpsvisualizer.common.IFileSelectedListener;
 import com.mendhak.gpsvisualizer.common.ProcessedData;
 import com.mendhak.gpsvisualizer.parsers.Gpx10Parser;
 
@@ -34,20 +35,18 @@ import java.io.File;
 import java.io.InputStream;
 
 
-public class MainImportFragment extends Fragment implements View.OnClickListener, IDataImportListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class MainImportFragment extends Fragment implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, IFileSelectedListener {
 
     private static final String ARG_SECTION_NUMBER = "section_number";
     private static final Integer ACTION_FILE_PICKER = 41792;
     int GDRIVE_RESOLVE_CONNECTION_REQUEST_CODE = 99;
     public static int GDRIVE_REQUEST_CODE_OPENER = 39;
     private View rootView;
+    private IDataImportListener dataImportListener;
 
 
-    public static MainImportFragment newInstance(int sectionNumber) {
+    public static MainImportFragment newInstance() {
         MainImportFragment fragment = new MainImportFragment();
-        Bundle args = new Bundle();
-        args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        fragment.setArguments(args);
         return fragment;
     }
 
@@ -65,6 +64,8 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         Button btnGoogle = (Button) rootView.findViewById(R.id.btnGoogleDrive);
         btnImport.setOnClickListener(this);
         btnGoogle.setOnClickListener(this);
+
+        dataImportListener = (IDataImportListener)getActivity();
 
         btnImport.setCompoundDrawablesWithIntrinsicBounds(R.drawable.esfileexplorer, 0, 0, 0);
 
@@ -152,12 +153,12 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    private void ProcessUserGpsFile(Uri uri) {
+    public void ProcessUserGpsFile(Uri uri) {
 
         File gpsFile = new File(uri.getPath());
 
         Gpx10Parser parser = new Gpx10Parser();
-        parser.Parse(gpsFile.getPath(), this);
+        parser.Parse(gpsFile.getPath(), dataImportListener);
         TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
         txtIntroduction.setText("Imported " + gpsFile.getName());
         ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
@@ -168,23 +169,20 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         InputStream stream = new ByteArrayInputStream(gpxContents.getBytes(Charsets.UTF_8));
         Gpx10Parser parser = new Gpx10Parser();
-        parser.Parse(stream, this);
+        parser.Parse(stream, dataImportListener);
 
         ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
     }
 
 
-    /**
-     * Replace the current application-wide track
-     *
-     * @param track
-     */
+
     @Override
-    public void OnDataImported(GpsTrack track) {
-        Log.i("GPSLogger", "Data imported");
-        ProcessedData.SetTrack(track);
+    public void OnFileSelected(Uri uri) {
+        ProcessUserGpsFile(uri);
     }
 
+
+    @Override
     public void OnGoogleDriveFileSelected(DriveId driveId) {
 
         final ProgressDialog progressBar = new ProgressDialog(getActivity());
@@ -233,10 +231,5 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                     }
 
                 });
-
-
     }
-
-
-
 }

@@ -1,13 +1,19 @@
 package com.mendhak.gpsvisualizer;
 
+import java.lang.ref.WeakReference;
+import java.util.Hashtable;
 import java.util.Locale;
+import java.util.prefs.Preferences;
 
+import android.accounts.AccountManager;
 import android.app.Activity;
 import android.app.ActionBar;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
 import android.content.Intent;
+import android.net.Uri;
+import android.preference.PreferenceFragment;
 import android.support.v13.app.FragmentPagerAdapter;
 import android.os.Bundle;
 import android.support.v4.view.ViewPager;
@@ -16,15 +22,20 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.ViewGroup;
 
+import com.google.android.gms.common.AccountPicker;
 import com.google.android.gms.drive.DriveId;
 import com.google.android.gms.drive.OpenFileActivityBuilder;
+import com.mendhak.gpsvisualizer.common.GpsTrack;
+import com.mendhak.gpsvisualizer.common.IDataImportListener;
+import com.mendhak.gpsvisualizer.common.IFileSelectedListener;
+import com.mendhak.gpsvisualizer.common.ProcessedData;
 import com.mendhak.gpsvisualizer.views.ChartFragment;
 import com.mendhak.gpsvisualizer.views.MainImportFragment;
 import com.mendhak.gpsvisualizer.views.MapFragment;
 import com.mendhak.gpsvisualizer.views.StatsFragment;
 
 
-public class MainActivity extends Activity implements ActionBar.TabListener {
+public class MainActivity extends Activity implements ActionBar.TabListener, IDataImportListener {
 
     /**
      * The {@link android.support.v4.view.PagerAdapter} that will provide
@@ -50,6 +61,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
     /** Drive file ID. */
     private String mFileId;
+    int GDRIVE_CHOOSE_ACCOUNT = 810;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -99,8 +111,18 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
         if (ACTION_DRIVE_OPEN.equals(action)) {
             // Get the Drive file ID.
             mFileId = intent.getStringExtra(EXTRA_FILE_ID);
-            Log.d("GPSVisualizer", "Received intent for file: " + mFileId);
+            Log.d("GPSVisualizer", "File ID: " + mFileId);
 
+            Intent accountPickerIntent = AccountPicker.newChooseAccountIntent(null, null,
+                    new String[]{"com.google"}, false, null, null, null, null);
+            startActivityForResult(accountPickerIntent, GDRIVE_CHOOSE_ACCOUNT);
+        }
+
+        if(action.equals(Intent.ACTION_VIEW)){
+
+            Log.d("GPSVisualizer", intent.getData().getPath());
+            MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
+            mainImportFragment.ProcessUserGpsFile(intent.getData());
         }
 
     }
@@ -158,7 +180,7 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
             // Return a MainImportFragment (defined as a static inner class below).
 
             if (position == 0) {
-                return MainImportFragment.newInstance(position + 1);
+                return MainImportFragment.newInstance();
 
             }
 
@@ -211,11 +233,38 @@ public class MainActivity extends Activity implements ActionBar.TabListener {
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+
+        if(requestCode == GDRIVE_CHOOSE_ACCOUNT && resultCode == RESULT_OK){
+
+            String mAccountName = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
+
+            if (mAccountName != null && mAccountName.length() > 0) {
+                // Try retrieving existing file.
+
+                DriveId driveId = data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
+                Log.d("GPSVisualizer", "resource : " + driveId.getResourceId());
+
+            }
+        }
+
         if(requestCode == MainImportFragment.GDRIVE_REQUEST_CODE_OPENER && resultCode == RESULT_OK ){
+
             DriveId driveId = data.getParcelableExtra(OpenFileActivityBuilder.EXTRA_RESPONSE_DRIVE_ID);
+
             MainImportFragment mainImportFragment = (MainImportFragment)getFragmentManager().findFragmentByTag("android:switcher:" + viewPager.getId() + ":0");
             mainImportFragment.OnGoogleDriveFileSelected(driveId);
         }
+    }
+
+    /**
+     * Replace the current application-wide track
+     *
+     * @param track
+     */
+    @Override
+    public void OnDataImported(GpsTrack track) {
+        Log.i("GPSVisualizer", "Data imported");
+        ProcessedData.SetTrack(track);
     }
 
 
