@@ -21,7 +21,9 @@ import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.*;
 
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 
@@ -215,11 +217,67 @@ public class StatsFragment extends Fragment {
                 statPoints.add(new StatPoint("Distance on flat ground", df.format(flatgroundDistance) + " m"));
             }
 
-            statPoints.add(new StatPoint("Total traversed distance", df.format(traversedDistance) + " m"));
+            statPoints.add(new StatPoint("Distance with elevation", df.format(traversedDistance) + " m"));
         }
 
 
         return statPoints;
+
+    }
+
+    public List<StatPoint> generateTimeData(GpsTrack track){
+        List<GpsPoint> trackPoints = track.getTrackPoints();
+        List<StatPoint> statPoints = Lists.newLinkedList();
+
+        SimpleDateFormat sdfDate = new SimpleDateFormat("MMM dd yyyy");
+        SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
+        Date startDate = Iterables.getFirst(trackPoints,null).getCalendar().getTime();
+        Date endDate = Iterables.getLast(trackPoints).getCalendar().getTime();
+
+        statPoints.add(new StatPoint("Date", sdfDate.format(startDate)));
+        statPoints.add(new StatPoint("Start Time", sdfTime.format(startDate)));
+        statPoints.add(new StatPoint("End Time", sdfTime.format(endDate)));
+
+        long timeDifferenceMillis = Iterables.getLast(trackPoints).getCalendar().getTimeInMillis() - Iterables.getFirst(trackPoints,null).getCalendar().getTimeInMillis();
+
+        statPoints.add(new StatPoint("Total time", String.valueOf(timeDifferenceMillis/60000) + " min"));
+
+        //Remove unelevated points for elevation based time calculations
+        trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
+        if(!trackPoints.isEmpty()) {
+            long climbingTime=0, descendingTime=0, flatGroundTime=0;
+
+            for(int i = 0; i < trackPoints.size(); i++) {
+                if (i == 0) {
+                    continue;
+                }
+
+                double elevationDifference = trackPoints.get(i).getElevation().get() - trackPoints.get(i-1).getElevation().get();
+                long timeDifference = trackPoints.get(i).getCalendar().getTimeInMillis() - trackPoints.get(i-1).getCalendar().getTimeInMillis();
+
+                if(elevationDifference > 0) { climbingTime += timeDifference; }
+                if(elevationDifference < 0) { descendingTime += timeDifference; }
+                if(elevationDifference ==0) { flatGroundTime += timeDifference; }
+            }
+
+            if(climbingTime>0){
+                statPoints.add(new StatPoint("Climbing Time",  String.valueOf(climbingTime/60000) + " min"));
+            }
+
+            if(descendingTime>0){
+                statPoints.add(new StatPoint("Descent Time",  String.valueOf(descendingTime/60000) + " min"));
+            }
+
+            if(flatGroundTime>0){
+                statPoints.add(new StatPoint("Flat Ground Time",  String.valueOf(flatGroundTime/60000) + " min"));
+            }
+
+            statPoints.add(new StatPoint("Time with elevation",  String.valueOf((climbingTime + descendingTime + flatGroundTime)/60000) + " min"));
+        }
+
+
+        return statPoints;
+
 
     }
 
@@ -304,6 +362,7 @@ public class StatsFragment extends Fragment {
         }
         else {
             layout.setBackgroundResource(R.drawable.wallpaper_time);
+            statPoints = generateTimeData(track);
         }
 
 
