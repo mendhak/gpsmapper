@@ -159,6 +159,70 @@ public class StatsFragment extends Fragment {
 
     }
 
+    public List<StatPoint> generateDistanceData(GpsTrack track){
+        List<GpsPoint> trackPoints = track.getTrackPoints();
+        List<StatPoint> statPoints = Lists.newLinkedList();
+
+        if(trackPoints.isEmpty()){ return statPoints; }
+
+        DecimalFormat df = new DecimalFormat("#.###");
+
+        double pointToPointDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
+        statPoints.add(new StatPoint("Point to point distance", df.format(pointToPointDistance) + " m"));
+
+        double beelineDistance = Utils.CalculateDistance(
+                Iterables.getLast(trackPoints).getLatitude(),
+                Iterables.getLast(trackPoints).getLongitude(),
+                Iterables.getFirst(trackPoints, null).getLatitude(),
+                Iterables.getFirst(trackPoints, null).getLongitude());
+
+        statPoints.add(new StatPoint("Beeline distance", df.format(beelineDistance) + " m"));
+
+        //Remove unelevated points for elevation based distance calculations
+        trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
+
+        if(!trackPoints.isEmpty()){
+            double traversedDistance = 0;
+            double climbedDistance = 0;
+            double descentDistance = 0;
+            double flatgroundDistance = 0;
+            for(int i = 0; i < trackPoints.size(); i++) {
+                if (i == 0) {
+                    continue;
+                }
+
+                double distanceDifference = trackPoints.get(i).getAccumulatedDistance() - trackPoints.get(i-1).getAccumulatedDistance();
+                double elevationDifference = trackPoints.get(i).getElevation().get() - trackPoints.get(i-1).getElevation().get();
+                double hypotenuse = Math.sqrt(Math.pow(distanceDifference,2) + Math.pow(Math.abs(elevationDifference),2));
+                traversedDistance += hypotenuse;
+
+                if(elevationDifference < 0) { descentDistance += hypotenuse; }
+                if (elevationDifference > 0) { climbedDistance += hypotenuse;}
+                if (elevationDifference == 0) { flatgroundDistance += hypotenuse; }
+
+
+            }
+
+            if(climbedDistance > 0){
+                statPoints.add(new StatPoint("Climbed Distance", df.format(climbedDistance) + " m"));
+            }
+
+            if(descentDistance > 0){
+                statPoints.add(new StatPoint("Descent Distance", df.format(descentDistance) + " m"));
+            }
+
+            if(flatgroundDistance > 0){
+                statPoints.add(new StatPoint("Distance on flat ground", df.format(flatgroundDistance) + " m"));
+            }
+
+            statPoints.add(new StatPoint("Total traversed distance", df.format(traversedDistance) + " m"));
+        }
+
+
+        return statPoints;
+
+    }
+
     public List<StatPoint> generateElevationData(GpsTrack track) {
 
         List<GpsPoint> trackPoints = track.getTrackPoints();
@@ -227,6 +291,7 @@ public class StatsFragment extends Fragment {
         LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.linear_layout_stats_fragment);
         if(statType == StatType.DISTANCE){
             layout.setBackgroundResource(R.drawable.wallpaper_distance);
+            statPoints = generateDistanceData(track);
 
         }
         else if (statType == StatType.ELEVATION){
