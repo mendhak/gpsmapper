@@ -294,20 +294,27 @@ public class ChartFragment extends Fragment{
 
         for(int i = 0; i< track.getWayPoints().size(); ++i){
 
-            final int index = i;
-            GpsPoint correspondingTrackPoint = Iterables.find(trackPoints, new Predicate<GpsPoint>() {
-                @Override
-                public boolean apply(GpsPoint input) {
-                    return input.getCalendar().getTimeInMillis() == track.getWayPoints().get(index).getCalendar().getTimeInMillis();
-                }
-            });
+            try{
+                final int index = i;
+                GpsPoint correspondingTrackPoint = Iterables.find(trackPoints, new Predicate<GpsPoint>() {
+                    @Override
+                    public boolean apply(GpsPoint input) {
+                        return input.getCalendar().getTimeInMillis() == track.getWayPoints().get(index).getCalendar().getTimeInMillis();
+                    }
+                });
 
-            long elapsedMinutes = (correspondingTrackPoint.getCalendar().getTimeInMillis()-trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
+                long elapsedMinutes = (correspondingTrackPoint.getCalendar().getTimeInMillis()-trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
 
-            params.WayPointValues.add(new PointValue(
-                    elapsedMinutes,
-                    correspondingTrackPoint.getAccumulatedDistance()
-            ).setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
+                params.WayPointValues.add(new PointValue(
+                        elapsedMinutes,
+                        correspondingTrackPoint.getAccumulatedDistance()
+                ).setLabel(track.getWayPoints().get(i).getDescription().toCharArray()));
+            }
+            catch(Exception e){
+
+
+            }
+
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");

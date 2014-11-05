@@ -193,7 +193,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
 
     @Override
-    public void OnGoogleDriveFileSelected(DriveId driveId) {
+    public void OnGoogleDriveFileSelected(final DriveId driveId) {
 
         final ProgressDialog progressBar = new ProgressDialog(getActivity());
         progressBar.setCancelable(true);
@@ -213,7 +213,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         };
 
         Log.d("GPSVisualizer", driveId.getResourceId());
-        DriveFile file = Drive.DriveApi.getFile(googleApiClient, driveId);
+        final DriveFile file = Drive.DriveApi.getFile(googleApiClient, driveId);
         file.openContents(googleApiClient, DriveFile.MODE_READ_ONLY, listener)
                 .setResultCallback(new ResultCallback<DriveApi.ContentsResult>() {
                     @Override
@@ -233,6 +233,14 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                         String fileContents = convertStreamToString(contents.getInputStream());
                         contents.close();
                         ProcessUserGpsFile(fileContents);
+                        file.getMetadata(googleApiClient).setResultCallback(new ResultCallback<DriveResource.MetadataResult>() {
+                            @Override
+                            public void onResult(DriveResource.MetadataResult metadataResult) {
+
+                                TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
+                                txtIntroduction.setText("Imported " + metadataResult.getMetadata().getTitle());
+                            }
+                        });
                     }
 
                     String convertStreamToString(java.io.InputStream is) {
