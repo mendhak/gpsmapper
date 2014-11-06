@@ -167,6 +167,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         File gpsFile = new File(uri.getPath());
 
+
         Gpx10Parser parser = new Gpx10Parser();
         parser.Parse(gpsFile.getPath(), dataImportListener);
         TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
@@ -175,14 +176,18 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     }
 
 
-    private void ProcessUserGpsFile(String gpxContents) {
+    private void ProcessUserGpsFile(String gpxContents, String fileName) {
 
         InputStream stream = new ByteArrayInputStream(gpxContents.getBytes(Charsets.UTF_8));
         Gpx10Parser parser = new Gpx10Parser();
         parser.Parse(stream, dataImportListener);
 
+        TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
+        txtIntroduction.setText("Imported " + fileName);
+
         ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
     }
+
 
 
 
@@ -203,7 +208,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         progressBar.setMax(100);
         progressBar.show();
 
-        DriveFile.DownloadProgressListener listener = new DriveFile.DownloadProgressListener() {
+        final DriveFile.DownloadProgressListener listener = new DriveFile.DownloadProgressListener() {
             @Override
             public void onProgress(long bytesDownloaded, long bytesExpected) {
                 int progress = (int) (bytesDownloaded * 100 / bytesExpected);
@@ -214,40 +219,45 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         Log.d("GPSVisualizer", driveId.getResourceId());
         final DriveFile file = Drive.DriveApi.getFile(googleApiClient, driveId);
-        file.openContents(googleApiClient, DriveFile.MODE_READ_ONLY, listener)
-                .setResultCallback(new ResultCallback<DriveApi.ContentsResult>() {
-                    @Override
-                    public void onResult(DriveApi.ContentsResult contentsResult) {
 
-                        if (!contentsResult.getStatus().isSuccess()) {
-                            progressBar.setMessage("Failed");
-                            progressBar.hide();
-                            Log.e("GPSVisualizer", "Could not open Google Drive file");
-                            return;
-                        }
+        file.getMetadata(googleApiClient).setResultCallback(new ResultCallback<DriveResource.MetadataResult>() {
+            @Override
+            public void onResult(DriveResource.MetadataResult metadataResult) {
 
-                        progressBar.setProgress(100);
-                        progressBar.hide();
+                final String importedFileName = metadataResult.getMetadata().getTitle();
 
-                        Contents contents = contentsResult.getContents();
-                        String fileContents = convertStreamToString(contents.getInputStream());
-                        contents.close();
-                        ProcessUserGpsFile(fileContents);
-                        file.getMetadata(googleApiClient).setResultCallback(new ResultCallback<DriveResource.MetadataResult>() {
+
+                file.openContents(googleApiClient, DriveFile.MODE_READ_ONLY, listener)
+                        .setResultCallback(new ResultCallback<DriveApi.ContentsResult>() {
                             @Override
-                            public void onResult(DriveResource.MetadataResult metadataResult) {
+                            public void onResult(DriveApi.ContentsResult contentsResult) {
 
-                                TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
-                                txtIntroduction.setText("Imported " + metadataResult.getMetadata().getTitle());
+                                if (!contentsResult.getStatus().isSuccess()) {
+                                    progressBar.setMessage("Failed");
+                                    progressBar.hide();
+                                    Log.e("GPSVisualizer", "Could not open Google Drive file");
+                                    return;
+                                }
+
+                                progressBar.setProgress(100);
+                                progressBar.hide();
+
+                                Contents contents = contentsResult.getContents();
+                                String fileContents = convertStreamToString(contents.getInputStream());
+                                contents.close();
+                                ProcessUserGpsFile(fileContents, importedFileName);
                             }
+
+                            String convertStreamToString(java.io.InputStream is) {
+                                java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
+                                return s.hasNext() ? s.next() : "";
+                            }
+
                         });
-                    }
 
-                    String convertStreamToString(java.io.InputStream is) {
-                        java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
-                        return s.hasNext() ? s.next() : "";
-                    }
+            }
+        });
 
-                });
+
     }
 }
