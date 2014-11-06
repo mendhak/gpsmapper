@@ -75,7 +75,7 @@ public class GpsTrack {
         return Iterables.filter(trackPoints, new Predicate<GpsPoint>() {
             @Override
             public boolean apply(GpsPoint input) {
-                return input.getSpeed().isPresent();
+                return input.getElevation().isPresent();
             }
         });
     }

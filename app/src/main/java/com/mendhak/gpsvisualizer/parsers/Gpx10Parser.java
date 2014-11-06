@@ -126,7 +126,7 @@ public class Gpx10Parser {
         public void endElement(String uri, String localName,
                                String qName) throws SAXException {
 
-            if(qName.equalsIgnoreCase("trkpt")){
+            if(qName.equalsIgnoreCase("trkpt") ||qName.equalsIgnoreCase("wpt")){
                 if(!trackPoints.isEmpty()){
                     accumulatedDistance += Utils.CalculateDistance(
                             lat,
