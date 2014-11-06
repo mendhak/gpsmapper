@@ -139,7 +139,10 @@ public class Gpx10Parser {
             }
 
             if(qName.equalsIgnoreCase("name")){
-                wayPoints.add(GpsPoint.wayPoint(lat, lon, sb.toString(), elevation, calendar));
+                if(lat != 0f && lon != 0f){
+                    wayPoints.add(GpsPoint.wayPoint(lat, lon, sb.toString(), elevation, calendar));
+                }
+
             }
 
             if(qName.equalsIgnoreCase("time")){
