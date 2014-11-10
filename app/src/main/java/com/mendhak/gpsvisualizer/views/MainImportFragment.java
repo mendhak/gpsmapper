@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -22,17 +23,20 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.*;
 import com.google.common.base.Charsets;
+import com.google.common.base.Stopwatch;
 import com.mendhak.gpsvisualizer.MainActivity;
 import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.GpsTrack;
 import com.mendhak.gpsvisualizer.common.IDataImportListener;
 import com.mendhak.gpsvisualizer.common.IFileSelectedListener;
 import com.mendhak.gpsvisualizer.common.ProcessedData;
+import com.mendhak.gpsvisualizer.parsers.BaseParser;
 import com.mendhak.gpsvisualizer.parsers.Gpx10Parser;
+import com.mendhak.gpsvisualizer.parsers.NmeaParser;
 
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.InputStream;
+
+import java.io.*;
+import java.util.concurrent.TimeUnit;
 
 
 public class MainImportFragment extends Fragment implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, IFileSelectedListener {
@@ -44,6 +48,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     private View rootView;
     private IDataImportListener dataImportListener;
 
+    ProgressDialog parserProgress;
 
     public static MainImportFragment newInstance() {
         MainImportFragment fragment = new MainImportFragment();
@@ -68,6 +73,8 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         dataImportListener = (IDataImportListener)getActivity();
 
         btnImport.setCompoundDrawablesWithIntrinsicBounds(R.drawable.esfileexplorer, 0, 0, 0);
+
+        parserProgress = new ProgressDialog(getActivity());
 
         return rootView;
     }
@@ -155,7 +162,15 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         if (requestCode == ACTION_FILE_PICKER  && resultCode == Activity.RESULT_OK) {
             Uri uri = data.getData();
             Log.d("GPSVisualizer", "File URI= " + uri);
-            ProcessUserGpsFile(uri);
+
+            parserProgress.setCancelable(true);
+            parserProgress.setMessage("Parsing ...");
+            parserProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            parserProgress.setProgress(0);
+            parserProgress.setMax(100);
+            parserProgress.show();
+
+            new FileProcessor().execute(uri);
         }
 
         if (requestCode == GDRIVE_RESOLVE_CONNECTION_REQUEST_CODE && resultCode == getActivity().RESULT_OK) {
@@ -163,16 +178,36 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         }
     }
 
+    private class FileProcessor extends AsyncTask<Uri, Void, Void>{
+        @Override
+        protected Void doInBackground(Uri... uris) {
+            ProcessUserGpsFile(uris[0]);
+            return null;
+        }
+    }
+
     public void ProcessUserGpsFile(Uri uri) {
 
-        File gpsFile = new File(uri.getPath());
+        final File gpsFile = new File(uri.getPath());
 
+        BaseParser parser = BaseParser.GetParserFromFilename(gpsFile.getPath());
 
-        Gpx10Parser parser = new Gpx10Parser();
-        parser.Parse(gpsFile.getPath(), dataImportListener);
-        TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
-        txtIntroduction.setText("Imported " + gpsFile.getName());
-        ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
+        try {
+            parser.Parse(new FileInputStream(gpsFile), dataImportListener);
+
+        } catch (Exception e) {
+            Log.e("GPSVisualizer", "Could not parse file. ", e);
+        }
+
+        getActivity().runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                parserProgress.hide();
+                TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
+                txtIntroduction.setText("Imported " + gpsFile.getName());
+                ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
+            }
+        });
     }
 
 

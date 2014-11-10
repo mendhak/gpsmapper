@@ -26,40 +26,15 @@ import javax.xml.parsers.SAXParserFactory;
 /**
  * Given a GPX file, parses the tracks and holds it. When GetParsedTrack is called, returns a GpsTrack.
  */
-public class Gpx10Parser {
+public class Gpx10Parser extends BaseParser {
 
     List<GpsPoint> trackPoints = Lists.newArrayList();
     List<GpsPoint> wayPoints = Lists.newArrayList();
 
-    public void Parse(String filePath, IDataImportListener callback) {
-        try {
+    public GpsTrack GetTrack(InputStream stream){
 
-            SAXParserFactory factory = SAXParserFactory.newInstance();
-            SAXParser saxParser = factory.newSAXParser();
+        GpsTrack track = new GpsTrack();
 
-
-            File file = new File(filePath);
-            InputStream inputStream= new FileInputStream(file);
-            Reader reader = new InputStreamReader(inputStream,"UTF-8");
-
-            InputSource is = new InputSource(reader);
-            is.setEncoding("UTF-8");
-
-            saxParser.parse(is, handler);
-            GpsTrack track = new GpsTrack();
-            track.setTrackPoints(trackPoints);
-            track.setWayPoints(wayPoints);
-
-            callback.OnDataImported(track);
-
-
-        } catch (Exception e) {
-            Log.e("GPSVisualizer", "Could not parse GPX file", e);
-            e.printStackTrace();
-        }
-    }
-
-    public void Parse(InputStream stream, IDataImportListener callback){
         try {
 
             SAXParserFactory factory = SAXParserFactory.newInstance();
@@ -71,17 +46,16 @@ public class Gpx10Parser {
             is.setEncoding("UTF-8");
 
             saxParser.parse(is, handler);
-            GpsTrack track = new GpsTrack();
+
             track.setTrackPoints(trackPoints);
             track.setWayPoints(wayPoints);
-
-            callback.OnDataImported(track);
-
 
         } catch (Exception e) {
             Log.e("GPSVisualizer", "Could not parse GPX file", e);
             e.printStackTrace();
         }
+
+        return track;
     }
 
 
@@ -135,7 +109,13 @@ public class Gpx10Parser {
                             trackPoints.get(trackPoints.size() - 1).getLongitude()
                     );
                 }
-                trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accumulatedDistance), speed));
+                if(qName.equalsIgnoreCase("trkpt")) {
+                    trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accumulatedDistance), speed));
+                }
+                if(qName.equalsIgnoreCase("wpt")) {
+                    wayPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accumulatedDistance), speed));
+                }
+
             }
 
             if(qName.equalsIgnoreCase("name")){
