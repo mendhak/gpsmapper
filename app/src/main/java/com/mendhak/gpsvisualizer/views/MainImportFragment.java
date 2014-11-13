@@ -279,7 +279,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
                                 Contents contents = contentsResult.getContents();
                                 String fileContents = convertStreamToString(contents.getInputStream());
-                                contents.close();
+
                                 ProcessUserGpsFile(fileContents, importedFileName);
                             }
 

@@ -1,0 +1,22 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <Preference
+
+        android:key="pref_version"
+        android:title="Version"
+        android:summary=""
+        android:icon="@drawable/ic_launcher"
+         />
+
+    <Preference
+
+        android:key="pref_gpslogger"
+        android:title="GPSLogger for Android"
+        android:summary=""
+        android:icon="@drawable/gpsloggericon"
+        />
+
+
+
+
+</PreferenceScreen>

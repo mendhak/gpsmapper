@@ -18,4 +18,6 @@
     <string name="action_selectstattype">Select category</string>
     <string name="import_introduction">Use the buttons below to import GPX files</string>
 
+    <string name="title_activity_settings">Settings</string>
+
 </resources>

@@ -81,8 +81,8 @@
     <orderEntry type="jdk" jdkName="Android API 20 Platform" jdkType="Android SDK" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" exported="" name="support-v13-20.0.0" level="project" />
-    <orderEntry type="library" exported="" name="play-services-4.2.42" level="project" />
     <orderEntry type="library" exported="" name="appcompat-v7-20.0.0" level="project" />
+    <orderEntry type="library" exported="" name="play-services-6.1.11" level="project" />
     <orderEntry type="library" exported="" name="hellocharts-library-1.0" level="project" />
     <orderEntry type="library" exported="" name="oceanebelle.parser.engine" level="project" />
     <orderEntry type="library" exported="" name="1_oceanebelle.parser.engine" level="project" />

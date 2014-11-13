@@ -1,6 +1,9 @@
 package com.mendhak.gpsvisualizer.common;
 
 
+import android.content.Context;
+import android.content.pm.PackageManager;
+
 public class Utils {
     /**
      * Uses the Haversine formula to calculate the distnace between to lat-long coordinates
@@ -33,6 +36,16 @@ public class Utils {
 
         return 6371 * c * 1000; //Distance in meters
 
+    }
+
+    public static boolean IsPackageInstalled(String packagename, Context context) {
+        PackageManager pm = context.getPackageManager();
+        try {
+            pm.getPackageInfo(packagename, PackageManager.GET_ACTIVITIES);
+            return true;
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
 }
