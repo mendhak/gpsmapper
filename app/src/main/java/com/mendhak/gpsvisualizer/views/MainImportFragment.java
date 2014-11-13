@@ -26,10 +26,7 @@ import com.google.common.base.Charsets;
 import com.google.common.base.Stopwatch;
 import com.mendhak.gpsvisualizer.MainActivity;
 import com.mendhak.gpsvisualizer.R;
-import com.mendhak.gpsvisualizer.common.GpsTrack;
-import com.mendhak.gpsvisualizer.common.IDataImportListener;
-import com.mendhak.gpsvisualizer.common.IFileSelectedListener;
-import com.mendhak.gpsvisualizer.common.ProcessedData;
+import com.mendhak.gpsvisualizer.common.*;
 import com.mendhak.gpsvisualizer.parsers.BaseParser;
 import com.mendhak.gpsvisualizer.parsers.Gpx10Parser;
 import com.mendhak.gpsvisualizer.parsers.NmeaParser;
@@ -102,8 +99,17 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     }
 
     public void openLocalFolder() {
+
         Intent mediaIntent = new Intent(Intent.ACTION_GET_CONTENT);
-        mediaIntent.setType("file/*"); //set mime type as per requirement
+
+        if(Utils.IsPackageInstalled("com.estrongs.android.pop", getActivity())){
+            mediaIntent = new Intent("com.estrongs.action.PICK_FILE");
+            mediaIntent.putExtra("com.estrongs.intent.extra.TITLE", "Select GPX/NMEA file");
+        } else {
+            //mediaIntent.setType("file/*"); //set mime type as per requirement
+            mediaIntent.setType("application/nmea");
+        }
+
         startActivityForResult(mediaIntent, ACTION_FILE_PICKER);
     }
 
