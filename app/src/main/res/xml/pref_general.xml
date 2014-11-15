@@ -17,6 +17,13 @@
         />
 
 
+    <Preference
+        android:key="pref_issue"
+        android:title="Email developer"
+        android:summary="Include the imported file if there's a problem with graphs/stats"
+        android:icon="@android:drawable/sym_action_email"
+        />
+
 
 
 </PreferenceScreen>

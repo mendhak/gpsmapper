@@ -77,6 +77,21 @@ public class SettingsActivity extends PreferenceActivity {
             }
         });
 
+        Preference pref_issue = (Preference)findPreference("pref_issue");
+        pref_issue.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override
+            public boolean onPreferenceClick(Preference preference) {
+                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
+                            "mailto","gpslogger@mendhak.com", null));
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "GPSVisualizer Issue");
+                    startActivity(Intent.createChooser(emailIntent, "Send email..."));
+
+                return false;
+            }
+        });
+
+
+
         return;
 
 
