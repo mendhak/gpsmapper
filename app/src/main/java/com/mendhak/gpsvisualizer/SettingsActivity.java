@@ -81,11 +81,10 @@ public class SettingsActivity extends PreferenceActivity {
         pref_issue.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                    Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts(
-                            "mailto","gpslogger@mendhak.com", null));
-                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "GPSVisualizer Issue");
-                    startActivity(Intent.createChooser(emailIntent, "Send email..."));
-
+                String url = "https://bitbucket.org/mendhak/gpsvisualizer/issues?status=new&status=open";
+                Intent i = new Intent(Intent.ACTION_VIEW);
+                i.setData(Uri.parse(url));
+                startActivity(i);
                 return false;
             }
         });

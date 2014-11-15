@@ -19,9 +19,9 @@
 
     <Preference
         android:key="pref_issue"
-        android:title="Email developer"
+        android:title="Issues, bugs, feedback"
         android:summary="Include the imported file if there's a problem with graphs/stats"
-        android:icon="@android:drawable/sym_action_email"
+        android:icon="@android:drawable/ic_menu_help"
         />
 
 
