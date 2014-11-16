@@ -40,6 +40,7 @@ public class NmeaParser extends BaseParser {
     public GpsTrack GetTrack(InputStream stream) {
 
         NmeaParserEngineBuilder builder = NmeaParserEngineFactory.newBuilder();
+        builder.setBufferSizeInBytes(256);
         builder.addEventHandler(NmeaHandlers.forGGA(new NmeaHandlers.HandlerAdapter() {
             @Override
             public void handle(NmeaDataAdapter nmeaDataAdapter) {
@@ -100,7 +101,7 @@ public class NmeaParser extends BaseParser {
                 trackPoints.add(point);
             }
             catch (NoSuchElementException nsee){
-                Log.d("GPSVisualizer", "NO speed found!");
+
             }
 
         }
