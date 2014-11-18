@@ -32,7 +32,7 @@ public class StatsFragment extends Fragment {
     private View rootView;
     private GpsTrack track;
     private boolean visibleToUser;
-    private static StatType statType = StatType.ELEVATION;
+    private static StatType statType = StatType.DISTANCE;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -41,7 +41,6 @@ public class StatsFragment extends Fragment {
 
         setHasOptionsMenu(true);
 
-        DisplayStats();
         return rootView;
     }
 
@@ -51,11 +50,11 @@ public class StatsFragment extends Fragment {
         visibleToUser = isVisibleToUser;
 
         if (visibleToUser) {
-            Log.d("GPSVisualizer", "Chart Fragment is now visible");
+            Log.d("GPSVisualizer", "Stats Fragment is now visible");
 
             DisplayStats();
         } else {
-            Log.d("GPSVisualizer", "Chart Fragment is now invisible");
+            Log.d("GPSVisualizer", "Stats Fragment is now invisible");
         }
     }
 
@@ -70,7 +69,7 @@ public class StatsFragment extends Fragment {
         int id = item.getItemId();
         if (id == R.id.stattype_selection) {
 
-            CharSequence statTypeNames[] = new CharSequence[] {"Elevation","Speed","Time","Distance"};
+            CharSequence statTypeNames[] = new CharSequence[] {"Distance","Elevation","Speed","Time"};
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
@@ -80,19 +79,19 @@ public class StatsFragment extends Fragment {
                 public void onClick(DialogInterface dialog, int which) {
                     switch(which){
                         case 0:
-                            statType = StatType.ELEVATION;
-                            break;
-                        case 1:
-                            statType = StatType.SPEED;
-                            break;
-                        case 2:
-                            statType = StatType.TIME;
-                            break;
-                        case 3:
                             statType = StatType.DISTANCE;
                             break;
-                        default:
+                        case 1:
                             statType = StatType.ELEVATION;
+                            break;
+                        case 2:
+                            statType = StatType.SPEED;
+                            break;
+                        case 3:
+                            statType = StatType.TIME;
+                            break;
+                        default:
+                            statType = StatType.DISTANCE;
                             break;
                     }
                     DisplayStats();
@@ -360,9 +359,13 @@ public class StatsFragment extends Fragment {
             layout.setBackgroundResource(R.drawable.wallpaper_speed);
             statPoints = generateSpeedData(track);
         }
-        else {
+        else if (statType == StatType.TIME){
             layout.setBackgroundResource(R.drawable.wallpaper_time);
             statPoints = generateTimeData(track);
+        }
+        else {
+            layout.setBackgroundResource(R.drawable.wallpaper_distance);
+            statPoints = generateDistanceData(track);
         }
 
 
@@ -397,10 +400,10 @@ public class StatsFragment extends Fragment {
     }
 
     private enum StatType {
+         DISTANCE,
          ELEVATION ,
          SPEED ,
-         TIME ,
-         DISTANCE
+         TIME
     }
 
     private class StatPoint {
