@@ -38,7 +38,7 @@ public class ChartFragment extends Fragment{
     private LineChartView chart;
     private LineChartData data;
     private static boolean visibleToUser;
-    private static ChartType chartType = ChartType.ELEVATION_OVER_DURATION;
+    private static ChartType chartType = ChartType.DISTANCE_OVER_TIME;
 
     public static ChartFragment newInstance(int sectionNumber) {
         ChartFragment fragment = new ChartFragment();
@@ -109,7 +109,7 @@ public class ChartFragment extends Fragment{
                 SetChartTitle("Distance/Time");
             }
             else {
-                params = generateDataElevationOverDuration(track);
+                params = generateDataDistanceOverTime(track);
                 SetChartTitle("Elevation/Time");
             }
 
@@ -446,8 +446,8 @@ public class ChartFragment extends Fragment{
         int id = item.getItemId();
         if (id == R.id.charttype_selection) {
 
-            CharSequence chartTypeSelection[] = new CharSequence[] {"Elevation over time",
-                    "Elevation over distance", "Speed over distance", "Speed over time", "Distance over time"};
+            CharSequence chartTypeSelection[] = new CharSequence[] {"Distance over time", "Elevation over time",
+                    "Elevation over distance", "Speed over distance", "Speed over time" };
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
@@ -457,27 +457,22 @@ public class ChartFragment extends Fragment{
                 public void onClick(DialogInterface dialog, int which) {
                     switch(which){
                         case 0:
-                            chartType = ChartType.ELEVATION_OVER_DURATION;
-
-                            break;
-                        case 1:
-                            chartType = ChartType.ELEVATION_OVER_DISTANCE;
-                            break;
-
-                        case 2:
-                            chartType = ChartType.SPEED_OVER_DISTANCE;
-                            break;
-
-                        case 3:
-                            chartType = ChartType.SPEED_OVER_DURATION;
-                            break;
-
-                        case 4:
                             chartType = ChartType.DISTANCE_OVER_TIME;
                             break;
-
-                        default:
+                        case 1:
                             chartType = ChartType.ELEVATION_OVER_DURATION;
+                            break;
+                        case 2:
+                            chartType = ChartType.ELEVATION_OVER_DISTANCE;
+                            break;
+                        case 3:
+                            chartType = ChartType.SPEED_OVER_DISTANCE;
+                            break;
+                        case 4:
+                            chartType = ChartType.SPEED_OVER_DURATION;
+                            break;
+                        default:
+                            chartType = ChartType.DISTANCE_OVER_TIME;
                             break;
                     }
                     SetupChart();
