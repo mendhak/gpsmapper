@@ -240,6 +240,8 @@ public class ChartFragment extends Fragment{
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
+        if(trackPoints.isEmpty()){ return params; }
+
         for (int i = 0; i < trackPoints.size(); ++i) {
 
             params.TrackPointValues.add(new PointValue(
