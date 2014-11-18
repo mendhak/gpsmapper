@@ -4,7 +4,9 @@
     <item android:id="@+id/stattype_selection"
           android:title="@string/action_selectstattype"
           android:orderInCategory="100"
-          android:showAsAction="never" />
+          android:showAsAction="always"
+          android:icon="@drawable/tiles"
+        />
 
 
 </menu>
