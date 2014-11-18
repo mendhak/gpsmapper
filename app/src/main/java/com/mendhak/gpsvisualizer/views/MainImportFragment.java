@@ -10,10 +10,12 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Html;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 
 import android.widget.TextView;
@@ -201,19 +203,40 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         try {
             parser.Parse(new FileInputStream(gpsFile), dataImportListener);
 
+
         } catch (Exception e) {
             Log.e("GPSVisualizer", "Could not parse file. ", e);
         }
 
-        getActivity().runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                parserProgress.hide();
-                TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
-                txtIntroduction.setText("Imported " + gpsFile.getName());
+        getActivity().runOnUiThread(new FileImportMessage(gpsFile.getName()));
+    }
+
+    private class FileImportMessage implements Runnable {
+
+        private String fileName;
+
+        public FileImportMessage(String fileName){
+            this.fileName = fileName;
+        }
+
+        @Override
+        public void run() {
+            parserProgress.hide();
+            TextView txtIntroduction = (TextView) rootView.findViewById(R.id.import_message);
+            String importedText = "<strong>Imported " + this.fileName + "</strong>";
+
+            if(!ProcessedData.isQualityTrack()){
+                importedText += "<br />Your track does not have many elevation points. You can still view the map, " +
+                        "but for best results, use a GPS logger that records elevation to get more details on the" +
+                        " stats and charts tabs.";
+                txtIntroduction.setText(Html.fromHtml(importedText));
+                txtIntroduction.setAnimation(AnimationUtils.loadAnimation(getActivity(),R.anim.fade));
+            }
+            else{
+                txtIntroduction.setText(Html.fromHtml(importedText));
                 ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
             }
-        });
+        }
     }
 
 
@@ -223,12 +246,8 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         Gpx10Parser parser = new Gpx10Parser();
         parser.Parse(stream, dataImportListener);
 
-        TextView txtIntroduction = (TextView) rootView.findViewById(R.id.section_label);
-        txtIntroduction.setText("Imported " + fileName);
-
-        ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
+        getActivity().runOnUiThread(new FileImportMessage(fileName));
     }
-
 
 
 

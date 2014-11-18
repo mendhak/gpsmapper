@@ -451,7 +451,7 @@ public class ChartFragment extends Fragment{
 
 
             AlertDialog.Builder builder = new AlertDialog.Builder(rootView.getContext());
-            builder.setTitle("Pick a map type");
+            builder.setTitle("Pick a chart type");
             builder.setItems(chartTypeSelection, new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {

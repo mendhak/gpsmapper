@@ -42,7 +42,25 @@
             android:gravity="left|center_vertical"
             android:text="Open from Google Drive"
             />
+
+        <Space
+            android:id="@+id/import_space"
+            android:layout_width="wrap_content"
+            android:layout_height="20dp"
+            android:layout_below="@id/btnGoogleDrive"
+            />
+        <TextView
+            android:id="@+id/import_message"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text=""
+            android:gravity="center"
+            android:layout_centerHorizontal="true"
+            android:layout_below="@id/import_space"
+            />
     </RelativeLayout>
+
+
 
 
 </RelativeLayout>
