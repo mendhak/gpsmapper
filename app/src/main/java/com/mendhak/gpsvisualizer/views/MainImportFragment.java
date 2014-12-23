@@ -25,17 +25,14 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.*;
 import com.google.common.base.Charsets;
-import com.google.common.base.Stopwatch;
 import com.mendhak.gpsvisualizer.MainActivity;
 import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.*;
 import com.mendhak.gpsvisualizer.parsers.BaseParser;
 import com.mendhak.gpsvisualizer.parsers.Gpx10Parser;
-import com.mendhak.gpsvisualizer.parsers.NmeaParser;
 
 
 import java.io.*;
-import java.util.concurrent.TimeUnit;
 
 
 public class MainImportFragment extends Fragment implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, IFileSelectedListener {
@@ -50,6 +47,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     private DriveId selectedGoogleDriveFile;
 
     ProgressDialog parserProgress;
+    ProgressDialog downloadProgress;
 
     public static MainImportFragment newInstance() {
         MainImportFragment fragment = new MainImportFragment();
@@ -68,8 +66,10 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         Button btnImport = (Button) rootView.findViewById(R.id.btnImportData);
         Button btnGoogle = (Button) rootView.findViewById(R.id.btnGoogleDrive);
+        Button btnReload = (Button) rootView.findViewById(R.id.btn_reload);
         btnImport.setOnClickListener(this);
         btnGoogle.setOnClickListener(this);
+        btnReload.setOnClickListener(this);
 
         dataImportListener = (IDataImportListener)getActivity();
 
@@ -104,7 +104,29 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             case R.id.btnGoogleDrive:
                 openGoogleFolder();
                 break;
+            case R.id.btn_reload:
+                reloadFile();
+                break;
         }
+    }
+
+    public void reloadFile(){
+
+        if(selectedGoogleDriveFile != null){
+            OnGoogleDriveFileSelected(selectedGoogleDriveFile);
+            //processGoogleDriveFile(selectedGoogleDriveFile);
+        }
+        else {
+            parserProgress = new ProgressDialog(getActivity());
+            parserProgress.setCancelable(true);
+            parserProgress.setMessage("Parsing ...");
+            parserProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+            parserProgress.setProgress(0);
+            parserProgress.setMax(100);
+            parserProgress.show();
+            new FileProcessor().execute(selectedLocalFile);
+        }
+
     }
 
     public void openLocalFolder() {
@@ -186,6 +208,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             parserProgress.show();
 
             selectedLocalFile=uri;
+            selectedGoogleDriveFile=null;
             new FileProcessor().execute(uri);
         }
 
@@ -230,12 +253,6 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         @Override
         public void run() {
 
-//            try {
-//                Thread.sleep(5000);
-//            } catch (InterruptedException e) {
-//                e.printStackTrace();
-//            }
-
             parserProgress.hide();
             TextView txtIntroduction = (TextView) rootView.findViewById(R.id.import_message);
             Button btnReload = (Button)rootView.findViewById(R.id.btn_reload);
@@ -254,19 +271,6 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             }
 
             btnReload.setVisibility(View.VISIBLE);
-            btnReload.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    parserProgress = new ProgressDialog(getActivity());
-                    parserProgress.setCancelable(true);
-                    parserProgress.setMessage("Parsing ...");
-                    parserProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-                    parserProgress.setProgress(0);
-                    parserProgress.setMax(100);
-                    parserProgress.show();
-                    new FileProcessor().execute(selectedLocalFile);
-                }
-            });
         }
     }
 
@@ -285,6 +289,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     @Override
     public void OnFileSelected(Uri uri) {
         selectedLocalFile = uri;
+        selectedGoogleDriveFile=null;
         ProcessUserGpsFile(uri);
     }
 
@@ -292,20 +297,29 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     @Override
     public void OnGoogleDriveFileSelected(final DriveId driveId) {
 
-        final ProgressDialog progressBar = new ProgressDialog(getActivity());
-        progressBar.setCancelable(true);
-        progressBar.setMessage("File downloading ...");
-        progressBar.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-        progressBar.setProgress(0);
-        progressBar.setMax(100);
-        progressBar.show();
+
+        downloadProgress = new ProgressDialog(getActivity());
+        downloadProgress.setCancelable(true);
+        downloadProgress.setMessage("File downloading ...");
+        downloadProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+        downloadProgress.setProgress(0);
+        downloadProgress.setMax(100);
+        downloadProgress.show();
+
+        selectedGoogleDriveFile = driveId;
+        processGoogleDriveFile(driveId);
+
+
+    }
+
+    private void processGoogleDriveFile(DriveId driveId) {
 
         final DriveFile.DownloadProgressListener listener = new DriveFile.DownloadProgressListener() {
             @Override
             public void onProgress(long bytesDownloaded, long bytesExpected) {
                 int progress = (int) (bytesDownloaded * 100 / bytesExpected);
                 Log.d("GPSVisualizer", String.format("Loading progress: %d percent", progress));
-                progressBar.setProgress(progress);
+                downloadProgress.setProgress(progress);
             }
         };
 
@@ -325,14 +339,14 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                             public void onResult(DriveApi.ContentsResult contentsResult) {
 
                                 if (!contentsResult.getStatus().isSuccess()) {
-                                    progressBar.setMessage("Failed");
-                                    progressBar.hide();
+                                    downloadProgress.setMessage("Failed");
+                                    downloadProgress.hide();
                                     Log.e("GPSVisualizer", "Could not open Google Drive file");
                                     return;
                                 }
 
-                                progressBar.setProgress(100);
-                                progressBar.hide();
+                                downloadProgress.setProgress(100);
+                                downloadProgress.hide();
 
                                 Contents contents = contentsResult.getContents();
                                 String fileContents = convertStreamToString(contents.getInputStream());
@@ -340,7 +354,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                                 ProcessUserGpsFile(fileContents, importedFileName);
                             }
 
-                            String convertStreamToString(java.io.InputStream is) {
+                            String convertStreamToString(InputStream is) {
                                 java.util.Scanner s = new java.util.Scanner(is).useDelimiter("\\A");
                                 return s.hasNext() ? s.next() : "";
                             }
@@ -349,7 +363,5 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
             }
         });
-
-
     }
 }
