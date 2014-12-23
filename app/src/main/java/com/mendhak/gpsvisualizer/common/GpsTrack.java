@@ -47,6 +47,8 @@ public class GpsTrack {
         @Override
         public int compare(GpsPoint left, GpsPoint right) {
 
+            if(!left.getElevation().isPresent() || !right.getElevation().isPresent()) { return 0; }
+
             if(left.getElevation().get() > right.getElevation().get()){
                 return 1;
             }
@@ -60,6 +62,8 @@ public class GpsTrack {
     public static Ordering<GpsPoint> SpeedOrdering = new Ordering<GpsPoint>() {
         @Override
         public int compare(GpsPoint left, GpsPoint right) {
+
+            if(!left.getSpeed().isPresent() || !right.getSpeed().isPresent()) { return 0; }
 
             if(left.getSpeed().get() > right.getSpeed().get()){
                 return 1;

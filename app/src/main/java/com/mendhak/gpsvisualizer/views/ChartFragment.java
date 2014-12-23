@@ -266,7 +266,6 @@ public class ChartFragment extends Fragment{
             }
         }
 
-
         return trackPoints;
     }
 
