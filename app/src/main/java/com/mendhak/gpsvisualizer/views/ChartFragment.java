@@ -254,9 +254,11 @@ public class ChartFragment extends Fragment{
             }
         }
 
-        float maxSpeed = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed().get();
-        float minSpeed = GpsTrack.SpeedOrdering.min(trackPoints).getSpeed().get();
-        if(maxSpeed > 2 || minSpeed > 0.6){
+        Optional<Float> maxSpeed = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed();
+        Optional<Float> minSpeed = GpsTrack.SpeedOrdering.min(trackPoints).getSpeed();
+
+
+        if((maxSpeed.isPresent() &&  maxSpeed.get() > 2) || (minSpeed.isPresent() && minSpeed.get() > 0.6)){
             Log.d("GPSVisualizer", "Speeds to be shown in kmph");
             speedInKmph = true;
             for(int i = 0; i < trackPoints.size(); ++i){
