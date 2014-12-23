@@ -285,7 +285,6 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     }
 
 
-
     @Override
     public void OnFileSelected(Uri uri) {
         selectedLocalFile = uri;

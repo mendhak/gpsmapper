@@ -20,6 +20,19 @@ public class GpsPoint {
     private float accumulatedDistance;
     private Optional<Float> speed;
 
+    public GpsPoint () {
+
+    }
+
+    public GpsPoint (GpsPoint other ){
+        this.setLatitude(other.getLatitude());
+        this.setLongitude(other.getLongitude());
+        this.setAccumulatedDistance(other.getAccumulatedDistance());
+        this.setSpeed(other.getSpeed());
+        this.setCalendar(other.getCalendar());
+        this.setDescription(other.getDescription());
+        this.setElevation(other.getElevation());
+    }
 
     public static GpsPoint from(float latitude, float longitude, @Nullable Float elevation, @Nullable Calendar calendar,
                                 @Nullable float accumulatedDistance,@Nullable Float speed){
