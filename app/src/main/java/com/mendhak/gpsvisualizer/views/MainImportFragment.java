@@ -46,6 +46,8 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     public static int GDRIVE_REQUEST_CODE_OPENER = 39;
     private View rootView;
     private IDataImportListener dataImportListener;
+    private Uri selectedLocalFile;
+    private DriveId selectedGoogleDriveFile;
 
     ProgressDialog parserProgress;
 
@@ -183,6 +185,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             parserProgress.setMax(100);
             parserProgress.show();
 
+            selectedLocalFile=uri;
             new FileProcessor().execute(uri);
         }
 
@@ -226,8 +229,16 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         @Override
         public void run() {
+
+//            try {
+//                Thread.sleep(5000);
+//            } catch (InterruptedException e) {
+//                e.printStackTrace();
+//            }
+
             parserProgress.hide();
             TextView txtIntroduction = (TextView) rootView.findViewById(R.id.import_message);
+            Button btnReload = (Button)rootView.findViewById(R.id.btn_reload);
             String importedText = "<strong>Imported " + this.fileName + "</strong>";
 
             if(!ProcessedData.isQualityTrack()){
@@ -241,6 +252,21 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                 txtIntroduction.setText(Html.fromHtml(importedText));
                 ((MainActivity) getActivity()).viewPager.setCurrentItem(1, true);
             }
+
+            btnReload.setVisibility(View.VISIBLE);
+            btnReload.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    parserProgress = new ProgressDialog(getActivity());
+                    parserProgress.setCancelable(true);
+                    parserProgress.setMessage("Parsing ...");
+                    parserProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                    parserProgress.setProgress(0);
+                    parserProgress.setMax(100);
+                    parserProgress.show();
+                    new FileProcessor().execute(selectedLocalFile);
+                }
+            });
         }
     }
 
@@ -258,6 +284,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
     @Override
     public void OnFileSelected(Uri uri) {
+        selectedLocalFile = uri;
         ProcessUserGpsFile(uri);
     }
 

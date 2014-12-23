@@ -49,6 +49,20 @@
             android:layout_height="20dp"
             android:layout_below="@id/btnGoogleDrive"
             />
+        <Button
+            android:id="@+id/btn_reload"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/import_space"
+            android:gravity="center"
+            android:drawableLeft="@android:drawable/ic_menu_revert"
+            android:text="Reload"
+            android:layout_centerHorizontal="true"
+            android:padding="0dp"
+            android:textStyle="bold"
+            android:visibility="invisible"
+            android:background="@android:color/transparent"
+            />
         <TextView
             android:id="@+id/import_message"
             android:layout_width="wrap_content"
@@ -56,8 +70,11 @@
             android:text=""
             android:gravity="center"
             android:layout_centerHorizontal="true"
-            android:layout_below="@id/import_space"
+            android:layout_below="@id/btn_reload"
             />
+
+
+
     </RelativeLayout>
 
 
