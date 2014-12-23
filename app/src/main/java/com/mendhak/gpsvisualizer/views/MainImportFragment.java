@@ -71,7 +71,12 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         dataImportListener = (IDataImportListener)getActivity();
 
-        btnImport.setCompoundDrawablesWithIntrinsicBounds(R.drawable.esfileexplorer, 0, 0, 0);
+        if(Utils.IsPackageInstalled("com.estrongs.android.pop", getActivity())){
+            btnImport.setCompoundDrawablesWithIntrinsicBounds(R.drawable.esfileexplorer, 0, 0, 0);
+        }
+        else {
+            btnImport.setCompoundDrawablesWithIntrinsicBounds(R.drawable.file, 0, 0, 0);
+        }
 
         parserProgress = new ProgressDialog(getActivity());
 
