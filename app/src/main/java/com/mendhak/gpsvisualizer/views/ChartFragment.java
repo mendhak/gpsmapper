@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
+import com.google.common.base.Optional;
 import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -40,6 +41,7 @@ public class ChartFragment extends Fragment{
     private static boolean visibleToUser;
     private static ChartType chartType = ChartType.DISTANCE_OVER_TIME;
     private boolean accumulatedDistanceInKms=false;
+    private boolean speedInKmph=false;
 
     public static ChartFragment newInstance(int sectionNumber) {
         ChartFragment fragment = new ChartFragment();
@@ -220,7 +222,7 @@ public class ChartFragment extends Fragment{
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
         params.XAxisName = "Accumulated Distance (" + (accumulatedDistanceInKms ? "km":"m") + ")";
-        params.YAxisName = "Speed (m/s)";
+        params.YAxisName = "Speed (" + (speedInKmph ? "km/h":"m/s") + ")";
 
 
 
@@ -245,11 +247,23 @@ public class ChartFragment extends Fragment{
         float maxDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
         if(maxDistance > 5000){
 
+            Log.d("GPSVisualizer", "Accumulated Distances to be shown in km");
             accumulatedDistanceInKms=true;
             for(int i = 0; i < trackPoints.size(); ++i){
                 trackPoints.get(i).setAccumulatedDistance(trackPoints.get(i).getAccumulatedDistance()/1000);
             }
         }
+
+        float maxSpeed = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed().get();
+        float minSpeed = GpsTrack.SpeedOrdering.min(trackPoints).getSpeed().get();
+        if(maxSpeed > 2 || minSpeed > 0.6){
+            Log.d("GPSVisualizer", "Speeds to be shown in kmph");
+            speedInKmph = true;
+            for(int i = 0; i < trackPoints.size(); ++i){
+                trackPoints.get(i).setSpeed(Optional.of(trackPoints.get(i).getSpeed().get() * 3.6f));
+            }
+        }
+
 
         return trackPoints;
     }
@@ -270,7 +284,7 @@ public class ChartFragment extends Fragment{
 
         if(trackPoints.isEmpty()){ return params; }
 
-        adjustTrackPointUnits(trackPoints);
+        trackPoints = adjustTrackPointUnits(trackPoints);
 
         for (int i = 0; i < trackPoints.size(); ++i) {
 
@@ -390,6 +404,8 @@ public class ChartFragment extends Fragment{
 
         if(trackPoints.isEmpty()) { return params; }
 
+        trackPoints = adjustTrackPointUnits(trackPoints);
+
         for (int i = 0; i < trackPoints.size(); ++i) {
             long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -
                     trackPoints.get(0).getCalendar().getTimeInMillis())/(1000*60);
@@ -399,9 +415,9 @@ public class ChartFragment extends Fragment{
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
         params.XAxisName = "Minutes since " + sdf.format(trackPoints.get(0).getCalendar().getTime());
-        params.YAxisName = "Speed (m/s)";
+        params.YAxisName = "Speed (" + (speedInKmph ? "km/h":"m/s") + ")";;
 
-        params.YAxisTop = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed().get()*1.05f;
+        params.YAxisTop = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed().get()*1.1f;
         params.YAxisBottom = GpsTrack.SpeedOrdering.min(trackPoints).getSpeed().get();
         params.XAxisLeft = 0;
         params.XAxisRight = ((trackPoints.get(trackPoints.size()-1).getCalendar().getTimeInMillis() -
@@ -424,6 +440,8 @@ public class ChartFragment extends Fragment{
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
         if(trackPoints.isEmpty()) { return params; }
+
+        trackPoints = adjustTrackPointUnits(trackPoints);
 
         for (int i = 0; i < trackPoints.size(); ++i) {
             long elapsedMinutes = (trackPoints.get(i).getCalendar().getTimeInMillis() -

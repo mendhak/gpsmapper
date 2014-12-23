@@ -24,7 +24,11 @@ public final class ISO8601 {
     public static Calendar toCalendar(final String iso8601string)
             throws ParseException {
         Calendar calendar = GregorianCalendar.getInstance();
-        String s = iso8601string.replace("Z", "+00:00");
+        String dateTimeString = iso8601string;
+
+        if(!dateTimeString.endsWith("Z")){ dateTimeString = dateTimeString + "Z"; }
+
+        String s = dateTimeString.replace("Z", "+00:00");
         try {
             s = s.substring(0, 22) + s.substring(23);  // to get rid of the ":"
         } catch (IndexOutOfBoundsException e) {
