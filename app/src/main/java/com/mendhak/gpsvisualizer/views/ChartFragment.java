@@ -39,6 +39,7 @@ public class ChartFragment extends Fragment{
     private LineChartData data;
     private static boolean visibleToUser;
     private static ChartType chartType = ChartType.DISTANCE_OVER_TIME;
+    private boolean accumulatedDistanceInKms=false;
 
     public static ChartFragment newInstance(int sectionNumber) {
         ChartFragment fragment = new ChartFragment();
@@ -193,7 +194,6 @@ public class ChartFragment extends Fragment{
 
     private ChartParameters generateDataSpeedOverDistance(GpsTrack track) {
 
-        boolean kmReduction = false;
 
         ChartParameters params = new ChartParameters();
 
@@ -202,24 +202,14 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        List<GpsPoint> trackPoints = Lists.newLinkedList();
-
-        for(int i = 0; i < track.getTrackPoints().size(); i++){
-            trackPoints.add(new GpsPoint(track.getTrackPoints().get(i)));
-        }
+        List<GpsPoint> trackPoints = copyOfTrackPoints(track);
 
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
 
         if(trackPoints.isEmpty()) { return params; }
 
-        float maxDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
-        if(maxDistance > 5000){
-            kmReduction = true;
-            for(int i = 0; i < trackPoints.size(); ++i){
-                trackPoints.get(i).setAccumulatedDistance(trackPoints.get(i).getAccumulatedDistance()/1000);
-            }
-        }
+        trackPoints = adjustTrackPointUnits(trackPoints);
 
         for (int i = 0; i < trackPoints.size(); ++i) {
 
@@ -229,7 +219,7 @@ public class ChartFragment extends Fragment{
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
-        params.XAxisName = "Accumulated Distance (" + (kmReduction ? "km":"m") + ")";
+        params.XAxisName = "Accumulated Distance (" + (accumulatedDistanceInKms ? "km":"m") + ")";
         params.YAxisName = "Speed (m/s)";
 
 
@@ -242,8 +232,30 @@ public class ChartFragment extends Fragment{
         return params;
     }
 
+    private List<GpsPoint> copyOfTrackPoints(GpsTrack track) {
+        List<GpsPoint> trackPoints = Lists.newLinkedList();
+        for(int i = 0; i < track.getTrackPoints().size(); i++){
+            trackPoints.add(new GpsPoint(track.getTrackPoints().get(i)));
+        }
+
+        return trackPoints;
+    }
+
+    private List<GpsPoint> adjustTrackPointUnits(List<GpsPoint> trackPoints) {
+        float maxDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
+        if(maxDistance > 5000){
+
+            accumulatedDistanceInKms=true;
+            for(int i = 0; i < trackPoints.size(); ++i){
+                trackPoints.get(i).setAccumulatedDistance(trackPoints.get(i).getAccumulatedDistance()/1000);
+            }
+        }
+
+        return trackPoints;
+    }
+
     private ChartParameters generateDataElevationOverDistance(final GpsTrack track) {
-        boolean kmReduction = false;
+
         ChartParameters params = new ChartParameters();
 
         params.TrackPointValues = Lists.newLinkedList();
@@ -251,25 +263,14 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        List<GpsPoint> trackPoints = Lists.newLinkedList();
-
-        for(int i = 0; i < track.getTrackPoints().size(); i++){
-            trackPoints.add(new GpsPoint(track.getTrackPoints().get(i)));
-        }
+        List<GpsPoint> trackPoints = copyOfTrackPoints(track);
 
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
 
         if(trackPoints.isEmpty()){ return params; }
 
-
-        float maxDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
-        if(maxDistance > 5000){
-            kmReduction = true;
-            for(int i = 0; i < trackPoints.size(); ++i){
-                trackPoints.get(i).setAccumulatedDistance(trackPoints.get(i).getAccumulatedDistance()/1000);
-            }
-        }
+        adjustTrackPointUnits(trackPoints);
 
         for (int i = 0; i < trackPoints.size(); ++i) {
 
@@ -299,7 +300,7 @@ public class ChartFragment extends Fragment{
         }
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
-        params.XAxisName = "Accumulated Distance (" + (kmReduction ? "km":"m") + ")";
+        params.XAxisName = "Accumulated Distance (" + (accumulatedDistanceInKms ? "km":"m") + ")";
         params.YAxisName = "Elevation (m)";
 
         params.YAxisTop = GpsTrack.ElevationOrdering.max(trackPoints).getElevation().get()*1.05f;
@@ -311,8 +312,7 @@ public class ChartFragment extends Fragment{
     }
 
     private ChartParameters generateDataDistanceOverTime(final GpsTrack track){
-        boolean kmReduction = false;
-        boolean hourReduction = false;
+
 
         ChartParameters params = new ChartParameters();
 
@@ -321,21 +321,11 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        List<GpsPoint> trackPoints = Lists.newLinkedList();
-
-        for(int i = 0; i < track.getTrackPoints().size(); i++){
-            trackPoints.add(new GpsPoint(track.getTrackPoints().get(i)));
-        }
+        List<GpsPoint> trackPoints = copyOfTrackPoints(track);
 
         if(trackPoints.isEmpty()) { return params; }
 
-        float maxDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
-        if(maxDistance > 5000){
-            kmReduction = true;
-            for(int i = 0; i < trackPoints.size(); ++i){
-                trackPoints.get(i).setAccumulatedDistance(trackPoints.get(i).getAccumulatedDistance()/1000);
-            }
-        }
+        trackPoints = adjustTrackPointUnits(trackPoints);
 
 
         for (int i = 0; i < trackPoints.size(); ++i) {
@@ -372,7 +362,7 @@ public class ChartFragment extends Fragment{
 
         SimpleDateFormat sdf = new SimpleDateFormat("HH:mm '('MMM dd yyyy')'");
         params.XAxisName = "Minutes since " + sdf.format(trackPoints.get(0).getCalendar().getTime());
-        params.YAxisName = "Distance (" + (kmReduction ? "km":"m") + ")";
+        params.YAxisName = "Distance (" + (accumulatedDistanceInKms ? "km":"m") + ")";
 
         params.YAxisTop = Iterables.getLast(trackPoints).getAccumulatedDistance()*1.1f;
         params.YAxisBottom = Iterables.getFirst(trackPoints,null).getAccumulatedDistance();
@@ -393,7 +383,7 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        List<GpsPoint> trackPoints = track.getTrackPoints();
+        List<GpsPoint> trackPoints = copyOfTrackPoints(track);
 
         //No speed is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
@@ -428,7 +418,7 @@ public class ChartFragment extends Fragment{
         params.XAxisValues = Lists.newLinkedList();
         params.YAxisValues = Lists.newLinkedList();
 
-        List<GpsPoint> trackPoints = track.getTrackPoints();
+        List<GpsPoint> trackPoints = copyOfTrackPoints(track);
 
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
