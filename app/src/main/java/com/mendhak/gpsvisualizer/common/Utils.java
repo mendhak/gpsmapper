@@ -4,6 +4,8 @@ package com.mendhak.gpsvisualizer.common;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import java.text.DecimalFormat;
+
 public class Utils {
     /**
      * Uses the Haversine formula to calculate the distnace between to lat-long coordinates
@@ -48,4 +50,39 @@ public class Utils {
         }
     }
 
+    public static String GetSpeedDisplay(double metersPerSecond, boolean imperial){
+
+        DecimalFormat df = new DecimalFormat("#.###");
+        String result = df.format(metersPerSecond) + " m/s";
+
+        if(imperial){
+            result = df.format(metersPerSecond * 2.23693629) + " mi/h";
+        }
+        else if(metersPerSecond >= 0.28){
+            result = df.format(metersPerSecond * 3.6) + " km/h";
+        }
+
+        return result;
+
+    }
+
+    public static String GetDistanceDisplay(double meters, boolean imperial) {
+        DecimalFormat df = new DecimalFormat("#.###");
+        String result = df.format(meters) + " m";
+
+        if(imperial){
+            if (meters <= 804){
+                result = df.format(meters * 3.2808399) + " ft";
+            }
+            else {
+                result = df.format(meters/1609.344) + " mi";
+            }
+
+        }
+        else if(meters >= 1000){
+            result = df.format(meters/1000) + " km";
+        }
+
+        return result;
+    }
 }

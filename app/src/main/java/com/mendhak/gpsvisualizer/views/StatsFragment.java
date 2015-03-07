@@ -115,19 +115,17 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
 
         if(trackPoints.isEmpty()) { return statPoints; }
 
-        DecimalFormat df = new DecimalFormat("#.###");
-
         double minimumSpeed = GpsTrack.SpeedOrdering.min(trackPoints).getSpeed().get();
         double maximumSpeed = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed().get();
-        statPoints.add(new StatPoint("Minimum speed", df.format(minimumSpeed) + "m/s", "The slowest speed recorded"));
-        statPoints.add(new StatPoint("Maximum speed", df.format(maximumSpeed) + "m/s", "The fastest speed recorded"));
+        statPoints.add(new StatPoint("Minimum speed", Utils.GetSpeedDisplay(minimumSpeed, false), "The slowest speed recorded"));
+        statPoints.add(new StatPoint("Maximum speed", Utils.GetSpeedDisplay(maximumSpeed, false), "The fastest speed recorded"));
 
         double averageSpeed = 0;
         for(GpsPoint p : trackPoints){
             averageSpeed += p.getSpeed().get();
         }
         averageSpeed = averageSpeed/trackPoints.size();
-        statPoints.add(new StatPoint("Average speed", df.format(averageSpeed) + "m/s", "Average speed across the points recorded"));
+        statPoints.add(new StatPoint("Average speed", Utils.GetSpeedDisplay(averageSpeed, false), "Average speed across the points recorded"));
 
         //Now also remove points without elevation
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
@@ -153,8 +151,8 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
         averageDescendingSpeed = averageDescendingSpeed/averageDescendingCount;
         averageClimbingSpeed = averageClimbingSpeed/averageClimbingCount;
 
-        statPoints.add(new StatPoint("Climbing speed", df.format(averageClimbingSpeed) +"m/s", "Average speed while ascending"));
-        statPoints.add(new StatPoint("Descent speed", df.format(averageDescendingSpeed) +"m/s", "Average speed while descending"));
+        statPoints.add(new StatPoint("Climbing speed", Utils.GetSpeedDisplay(averageClimbingSpeed, false), "Average speed while ascending"));
+        statPoints.add(new StatPoint("Descent speed", Utils.GetSpeedDisplay(averageDescendingSpeed, false), "Average speed while descending"));
 
 
         return statPoints;
@@ -167,10 +165,10 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
 
         if(trackPoints.isEmpty()){ return statPoints; }
 
-        DecimalFormat df = new DecimalFormat("#.###");
+//        DecimalFormat df = new DecimalFormat("#.###");
 
         double pointToPointDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
-        statPoints.add(new StatPoint("Point to point distance", df.format(pointToPointDistance) + " m", "Accumulated distance across all recorded points"));
+        statPoints.add(new StatPoint("Point to point distance", Utils.GetDistanceDisplay(pointToPointDistance, false), "Accumulated distance across all recorded points"));
 
         double beelineDistance = Utils.CalculateDistance(
                 Iterables.getLast(trackPoints).getLatitude(),
@@ -178,7 +176,7 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
                 Iterables.getFirst(trackPoints, null).getLatitude(),
                 Iterables.getFirst(trackPoints, null).getLongitude());
 
-        statPoints.add(new StatPoint("Beeline distance", df.format(beelineDistance) + " m", "Direct distance between the first and last points recorded"));
+        statPoints.add(new StatPoint("Beeline distance", Utils.GetDistanceDisplay(beelineDistance, false) , "Direct distance between the first and last points recorded"));
 
         //Remove unelevated points for elevation based distance calculations
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
@@ -206,18 +204,18 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
             }
 
             if(climbedDistance > 0){
-                statPoints.add(new StatPoint("Climbed Distance", df.format(climbedDistance) + " m", "Total distance climbing upwards"));
+                statPoints.add(new StatPoint("Climbed Distance", Utils.GetDistanceDisplay(climbedDistance, false) , "Total distance climbing upwards"));
             }
 
             if(descentDistance > 0){
-                statPoints.add(new StatPoint("Descent Distance", df.format(descentDistance) + " m", "Total distance going down"));
+                statPoints.add(new StatPoint("Descent Distance", Utils.GetDistanceDisplay(descentDistance, false), "Total distance going down"));
             }
 
             if(flatgroundDistance > 0){
-                statPoints.add(new StatPoint("Distance on flat ground", df.format(flatgroundDistance) + " m", "Total distance on flat ground"));
+                statPoints.add(new StatPoint("Distance on flat ground", Utils.GetDistanceDisplay(flatgroundDistance, false), "Total distance on flat ground"));
             }
 
-            statPoints.add(new StatPoint("Distance with elevation", df.format(traversedDistance) + " m", "Sum of upwards, downwards and flat distance"));
+            statPoints.add(new StatPoint("Distance with elevation",  Utils.GetDistanceDisplay(traversedDistance, false), "Sum of upwards, downwards and flat distance"));
         }
 
 
@@ -292,18 +290,16 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
         if(trackPoints.isEmpty()){ return statPoints; }
 
 
-        DecimalFormat df = new DecimalFormat("#.###");
-
         double startElevation = Iterables.getFirst(trackPoints,null).getElevation().get();
         double endElevation = Iterables.getLast(trackPoints, null).getElevation().get();
-        statPoints.add(new StatPoint("Start Elevation", df.format(startElevation) + "m" , "Elevation at the beginning"));
-        statPoints.add(new StatPoint("End Elevation", df.format(endElevation) + "m", "Elevation at the end" ));
+        statPoints.add(new StatPoint("Start Elevation", Utils.GetDistanceDisplay(startElevation, false) , "Elevation at the beginning"));
+        statPoints.add(new StatPoint("End Elevation", Utils.GetDistanceDisplay(endElevation, false), "Elevation at the end" ));
 
         double minimumElevation = GpsTrack.ElevationOrdering.min(trackPoints).getElevation().get();
         double maximumElevation = GpsTrack.ElevationOrdering.max(trackPoints).getElevation().get();
 
-        statPoints.add(new StatPoint("Minimum Elevation", df.format(minimumElevation) + "m", "Lowest recorded elevation" ));
-        statPoints.add(new StatPoint("Maximum Elevation", df.format(maximumElevation) + "m", "Highest recorded elevation" ));
+        statPoints.add(new StatPoint("Minimum Elevation", Utils.GetDistanceDisplay(minimumElevation, false), "Lowest recorded elevation" ));
+        statPoints.add(new StatPoint("Maximum Elevation", Utils.GetDistanceDisplay(maximumElevation, false), "Highest recorded elevation" ));
 
 
         double avgElevation = 0;
@@ -312,7 +308,7 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
         }
 
         avgElevation = avgElevation/trackPoints.size();
-        statPoints.add(new StatPoint("Average Elevation",df.format(avgElevation) + "m", "Average elevation across all the points" ));
+        statPoints.add(new StatPoint("Average Elevation", Utils.GetDistanceDisplay(avgElevation, false), "Average elevation across all the points" ));
 
         double climbing = 0;
         double descending = 0;
@@ -329,9 +325,9 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
             }
         }
 
-        statPoints.add(new StatPoint("Total Climbing", df.format(climbing) + "m", "Total upwards climbing distance"));
-        statPoints.add(new StatPoint("Total Descending", df.format(descending) + "m", "Total descending distance"));
-        statPoints.add(new StatPoint("Net Ascent", df.format(climbing - descending) + "m", "Climbing distance - descending distance"));
+        statPoints.add(new StatPoint("Total Climbing",   Utils.GetDistanceDisplay(climbing, false), "Total upwards climbing distance"));
+        statPoints.add(new StatPoint("Total Descending", Utils.GetDistanceDisplay(descending, false), "Total descending distance"));
+        statPoints.add(new StatPoint("Net Ascent",       Utils.GetDistanceDisplay(climbing - descending, false), "Climbing distance - descending distance"));
 
         return statPoints;
     }
