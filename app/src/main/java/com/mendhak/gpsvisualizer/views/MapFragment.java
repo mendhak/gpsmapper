@@ -1,8 +1,12 @@
 package com.mendhak.gpsvisualizer.views;
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -15,11 +19,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.LatLngBounds;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.maps.model.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
@@ -37,6 +37,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     private View rootView;
     private GpsTrack track;
     private static boolean visibleToUser;
+    private List<LatLng> gmapLatLongs;
     private static int mapType = GoogleMap.MAP_TYPE_NORMAL;
 
     public static MapFragment newInstance(int sectionNumber) {
@@ -82,6 +83,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         super.onResume();
 
         mapView.onResume();
+
     }
 
     @Override
@@ -185,17 +187,61 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         googleMap.clear();
         googleMap.setMapType(mapType);
 
+        googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+            @Override
+            public void onCameraChange(CameraPosition cameraPosition) {
+
+
+
+                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+                boolean showCircles = prefs.getBoolean("pref_map_showcircles", false);
+
+                Log.d("GPSVisualizer", String.valueOf( cameraPosition.zoom));
+                Log.d("GPSVisualizer", String.valueOf(showCircles));
+
+                if(!showCircles){
+                    return;
+                }
+
+                if(cameraPosition.zoom <= 13f){
+                    return;
+                }
+
+                //Can't clear only circles, so we have to clear everything and redraw.
+                googleMap.clear();
+                DrawLineAndMarkers();
+
+                for(GpsPoint trk : track.getTrackPoints()){
+
+                    if(googleMap.getProjection().getVisibleRegion().latLngBounds
+                            .contains(new LatLng(trk.getLatitude(), trk.getLongitude()))){
+
+                        CircleOptions co = new CircleOptions()
+                                .center(new LatLng(trk.getLatitude(), trk.getLongitude()))
+                                .radius(30 - cameraPosition.zoom)
+                                .strokeWidth(0)
+                                .fillColor(Color.BLUE);
+
+                        googleMap.addCircle(co);
+
+                    }
+                }
+
+            }
+        });
+
         track = ProcessedData.GetTrack();
 
         if(track.getTrackPoints().size() > 0){
-            List<LatLng> gmapLatLongs = Lists.transform(track.getTrackPoints(), new Function<GpsPoint, LatLng>() {
+            gmapLatLongs = Lists.transform(track.getTrackPoints(), new Function<GpsPoint, LatLng>() {
                 @Override
                 public LatLng apply(GpsPoint input) {
                     return new LatLng(input.getLatitude(), input.getLongitude());
                 }
             });
 
-            googleMap.addPolyline(new PolylineOptions().geodesic(true).add(Iterables.toArray(gmapLatLongs, LatLng.class)));
+
+            DrawLineAndMarkers();
 
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (LatLng ll : gmapLatLongs) {
@@ -210,14 +256,20 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
             //googleMap.animateCamera(CameraUpdateFactory.zoomIn());
 
 
-            for(GpsPoint wpt : track.getWayPoints()){
-                MarkerOptions marker = new MarkerOptions().position(
-                        new LatLng(wpt.getLatitude(), wpt.getLongitude())).title(wpt.getDescription());
-                // Changing marker icon
-                marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
-                // adding marker
-                googleMap.addMarker(marker);
-            }
+        }
+    }
+
+    private void DrawLineAndMarkers() {
+
+        googleMap.addPolyline(new PolylineOptions().geodesic(true).add(Iterables.toArray(gmapLatLongs, LatLng.class)));
+
+        for(GpsPoint wpt : track.getWayPoints()){
+            MarkerOptions marker = new MarkerOptions().position(
+                    new LatLng(wpt.getLatitude(), wpt.getLongitude())).title(wpt.getDescription());
+            // Changing marker icon
+            marker.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_ROSE));
+            // adding marker
+            googleMap.addMarker(marker);
         }
     }
 
