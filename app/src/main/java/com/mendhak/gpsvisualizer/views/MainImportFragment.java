@@ -4,8 +4,10 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -30,6 +32,7 @@ import com.mendhak.gpsvisualizer.R;
 import com.mendhak.gpsvisualizer.common.*;
 import com.mendhak.gpsvisualizer.parsers.BaseParser;
 import com.mendhak.gpsvisualizer.parsers.Gpx10Parser;
+import com.nononsenseapps.filepicker.FilePickerActivity;
 
 
 import java.io.*;
@@ -131,14 +134,36 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
     public void openLocalFolder() {
 
-        Intent mediaIntent = new Intent(Intent.ACTION_GET_CONTENT);
+        File gpsLoggerFilePath = null;
+        Intent mediaIntent = null;
+
+        try {
+            gpsLoggerFilePath = getActivity()
+                    .createPackageContext("com.mendhak.gpslogger",
+                            Context.CONTEXT_IGNORE_SECURITY)
+                    .getExternalFilesDir(null);
+
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e("GPSVisualizer", "Could not determine GPSLogger's files dir", e);
+        }
 
         if(Utils.IsPackageInstalled("com.estrongs.android.pop", getActivity())){
             mediaIntent = new Intent("com.estrongs.action.PICK_FILE");
             mediaIntent.putExtra("com.estrongs.intent.extra.TITLE", "Select GPX/NMEA file");
+
+            if(gpsLoggerFilePath != null && gpsLoggerFilePath.isDirectory()){
+                mediaIntent.setData(Uri.fromFile(gpsLoggerFilePath));
+            }
+
         } else {
-            //mediaIntent.setType("file/*"); //set mime type as per requirement
-            mediaIntent.setType("application/nmea");
+            mediaIntent = new Intent(getActivity(), FilePickerActivity.class);
+            mediaIntent.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+            mediaIntent.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+            mediaIntent.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
+
+            if(gpsLoggerFilePath != null && gpsLoggerFilePath.isDirectory()){
+                mediaIntent.putExtra(FilePickerActivity.EXTRA_START_PATH, gpsLoggerFilePath.getPath());
+            }
         }
 
         startActivityForResult(mediaIntent, ACTION_FILE_PICKER);
