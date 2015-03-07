@@ -6,6 +6,12 @@
         android:summary="Show a blue circle over every point on the track (when zoomed in sufficiently)"
         android:defaultValue="false"/>
 
+    <CheckBoxPreference
+        android:key="pref_stats_imperial"
+        android:title="Show imperial units"
+        android:summary="Use miles, feet and bushels instead of standard metric units"
+        android:defaultValue="false"/>
+
     <PreferenceCategory android:title="Other">
 
     <Preference
