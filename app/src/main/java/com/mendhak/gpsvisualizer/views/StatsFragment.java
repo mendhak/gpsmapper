@@ -10,28 +10,29 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.*;
 import android.view.animation.AnimationUtils;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
 
+import android.widget.Toast;
 import com.etsy.android.grid.StaggeredGridView;
-import com.google.common.base.Predicate;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.mendhak.gpsvisualizer.R;
-
 import com.mendhak.gpsvisualizer.common.*;
-
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 
-public class StatsFragment extends Fragment {
+public class StatsFragment extends Fragment implements AdapterView.OnItemClickListener {
 
+    private List<StatPoint> statPoints;
+    private StaggeredGridView staggeredGridView;
     private View rootView;
     private GpsTrack track;
     private boolean visibleToUser;
+    private Toast toast;
     private static StatType statType = StatType.DISTANCE;
 
     @Override
@@ -108,7 +109,7 @@ public class StatsFragment extends Fragment {
 
     public List<StatPoint> generateSpeedData(GpsTrack track){
         List<GpsPoint> trackPoints = track.getTrackPoints();
-        List<StatPoint> statPoints = Lists.newLinkedList();
+        statPoints = Lists.newLinkedList();
 
         trackPoints = Lists.newArrayList(GpsTrack.SpeedFilter(trackPoints));
 
@@ -118,15 +119,15 @@ public class StatsFragment extends Fragment {
 
         double minimumSpeed = GpsTrack.SpeedOrdering.min(trackPoints).getSpeed().get();
         double maximumSpeed = GpsTrack.SpeedOrdering.max(trackPoints).getSpeed().get();
-        statPoints.add(new StatPoint("Minimum speed", df.format(minimumSpeed) + "m/s"));
-        statPoints.add(new StatPoint("Maximum speed", df.format(maximumSpeed) + "m/s"));
+        statPoints.add(new StatPoint("Minimum speed", df.format(minimumSpeed) + "m/s", "The slowest speed recorded"));
+        statPoints.add(new StatPoint("Maximum speed", df.format(maximumSpeed) + "m/s", "The fastest speed recorded"));
 
         double averageSpeed = 0;
         for(GpsPoint p : trackPoints){
             averageSpeed += p.getSpeed().get();
         }
         averageSpeed = averageSpeed/trackPoints.size();
-        statPoints.add(new StatPoint("Average speed", df.format(averageSpeed) + "m/s"));
+        statPoints.add(new StatPoint("Average speed", df.format(averageSpeed) + "m/s", "Average speed across the points recorded"));
 
         //Now also remove points without elevation
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
@@ -152,8 +153,8 @@ public class StatsFragment extends Fragment {
         averageDescendingSpeed = averageDescendingSpeed/averageDescendingCount;
         averageClimbingSpeed = averageClimbingSpeed/averageClimbingCount;
 
-        statPoints.add(new StatPoint("Climbing speed", df.format(averageClimbingSpeed) +"m/s"));
-        statPoints.add(new StatPoint("Descent speed", df.format(averageDescendingSpeed) +"m/s"));
+        statPoints.add(new StatPoint("Climbing speed", df.format(averageClimbingSpeed) +"m/s", "Average speed while ascending"));
+        statPoints.add(new StatPoint("Descent speed", df.format(averageDescendingSpeed) +"m/s", "Average speed while descending"));
 
 
         return statPoints;
@@ -162,14 +163,14 @@ public class StatsFragment extends Fragment {
 
     public List<StatPoint> generateDistanceData(GpsTrack track){
         List<GpsPoint> trackPoints = track.getTrackPoints();
-        List<StatPoint> statPoints = Lists.newLinkedList();
+        statPoints = Lists.newLinkedList();
 
         if(trackPoints.isEmpty()){ return statPoints; }
 
         DecimalFormat df = new DecimalFormat("#.###");
 
         double pointToPointDistance = Iterables.getLast(trackPoints).getAccumulatedDistance();
-        statPoints.add(new StatPoint("Point to point distance", df.format(pointToPointDistance) + " m"));
+        statPoints.add(new StatPoint("Point to point distance", df.format(pointToPointDistance) + " m", "Accumulated distance across all recorded points"));
 
         double beelineDistance = Utils.CalculateDistance(
                 Iterables.getLast(trackPoints).getLatitude(),
@@ -177,7 +178,7 @@ public class StatsFragment extends Fragment {
                 Iterables.getFirst(trackPoints, null).getLatitude(),
                 Iterables.getFirst(trackPoints, null).getLongitude());
 
-        statPoints.add(new StatPoint("Beeline distance", df.format(beelineDistance) + " m"));
+        statPoints.add(new StatPoint("Beeline distance", df.format(beelineDistance) + " m", "Direct distance between the first and last points recorded"));
 
         //Remove unelevated points for elevation based distance calculations
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
@@ -205,18 +206,18 @@ public class StatsFragment extends Fragment {
             }
 
             if(climbedDistance > 0){
-                statPoints.add(new StatPoint("Climbed Distance", df.format(climbedDistance) + " m"));
+                statPoints.add(new StatPoint("Climbed Distance", df.format(climbedDistance) + " m", "Total distance climbing upwards"));
             }
 
             if(descentDistance > 0){
-                statPoints.add(new StatPoint("Descent Distance", df.format(descentDistance) + " m"));
+                statPoints.add(new StatPoint("Descent Distance", df.format(descentDistance) + " m", "Total distance going down"));
             }
 
             if(flatgroundDistance > 0){
-                statPoints.add(new StatPoint("Distance on flat ground", df.format(flatgroundDistance) + " m"));
+                statPoints.add(new StatPoint("Distance on flat ground", df.format(flatgroundDistance) + " m", "Total distance on flat ground"));
             }
 
-            statPoints.add(new StatPoint("Distance with elevation", df.format(traversedDistance) + " m"));
+            statPoints.add(new StatPoint("Distance with elevation", df.format(traversedDistance) + " m", "Sum of upwards, downwards and flat distance"));
         }
 
 
@@ -226,20 +227,20 @@ public class StatsFragment extends Fragment {
 
     public List<StatPoint> generateTimeData(GpsTrack track){
         List<GpsPoint> trackPoints = track.getTrackPoints();
-        List<StatPoint> statPoints = Lists.newLinkedList();
+        statPoints = Lists.newLinkedList();
 
         SimpleDateFormat sdfDate = new SimpleDateFormat("MMM dd yyyy");
         SimpleDateFormat sdfTime = new SimpleDateFormat("HH:mm");
         Date startDate = Iterables.getFirst(trackPoints,null).getCalendar().getTime();
         Date endDate = Iterables.getLast(trackPoints).getCalendar().getTime();
 
-        statPoints.add(new StatPoint("Date", sdfDate.format(startDate)));
-        statPoints.add(new StatPoint("Start Time", sdfTime.format(startDate)));
-        statPoints.add(new StatPoint("End Time", sdfTime.format(endDate)));
+        statPoints.add(new StatPoint("Date", sdfDate.format(startDate), ""));
+        statPoints.add(new StatPoint("Start Time", sdfTime.format(startDate), "When recording started"));
+        statPoints.add(new StatPoint("End Time", sdfTime.format(endDate), "When recording ended"));
 
         long timeDifferenceMillis = Iterables.getLast(trackPoints).getCalendar().getTimeInMillis() - Iterables.getFirst(trackPoints,null).getCalendar().getTimeInMillis();
 
-        statPoints.add(new StatPoint("Total time", String.valueOf(timeDifferenceMillis/60000) + " min"));
+        statPoints.add(new StatPoint("Total time", String.valueOf(timeDifferenceMillis/60000) + " min", "Total recording time"));
 
         //Remove unelevated points for elevation based time calculations
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
@@ -260,18 +261,18 @@ public class StatsFragment extends Fragment {
             }
 
             if(climbingTime>0){
-                statPoints.add(new StatPoint("Climbing Time",  String.valueOf(climbingTime/60000) + " min"));
+                statPoints.add(new StatPoint("Climbing Time",  String.valueOf(climbingTime/60000) + " min", "Time spent climbing"));
             }
 
             if(descendingTime>0){
-                statPoints.add(new StatPoint("Descent Time",  String.valueOf(descendingTime/60000) + " min"));
+                statPoints.add(new StatPoint("Descent Time",  String.valueOf(descendingTime/60000) + " min", "Time spent descending"));
             }
 
             if(flatGroundTime>0){
-                statPoints.add(new StatPoint("Flat Ground Time",  String.valueOf(flatGroundTime/60000) + " min"));
+                statPoints.add(new StatPoint("Flat Ground Time",  String.valueOf(flatGroundTime/60000) + " min", "Time spent on flat ground"));
             }
 
-            statPoints.add(new StatPoint("Time with elevation",  String.valueOf((climbingTime + descendingTime + flatGroundTime)/60000) + " min"));
+            statPoints.add(new StatPoint("Time with elevation",  String.valueOf((climbingTime + descendingTime + flatGroundTime)/60000) + " min", "Total time going up, down and flat"));
         }
 
 
@@ -283,7 +284,7 @@ public class StatsFragment extends Fragment {
     public List<StatPoint> generateElevationData(GpsTrack track) {
 
         List<GpsPoint> trackPoints = track.getTrackPoints();
-        List<StatPoint> statPoints = Lists.newLinkedList();
+        statPoints = Lists.newLinkedList();
 
         //Elevation of 0m is a bad data point.  Remove these.
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
@@ -295,14 +296,14 @@ public class StatsFragment extends Fragment {
 
         double startElevation = Iterables.getFirst(trackPoints,null).getElevation().get();
         double endElevation = Iterables.getLast(trackPoints, null).getElevation().get();
-        statPoints.add(new StatPoint("Start Elevation", df.format(startElevation) + "m" ));
-        statPoints.add(new StatPoint("End Elevation", df.format(endElevation) + "m" ));
+        statPoints.add(new StatPoint("Start Elevation", df.format(startElevation) + "m" , "Elevation at the beginning"));
+        statPoints.add(new StatPoint("End Elevation", df.format(endElevation) + "m", "Elevation at the end" ));
 
         double minimumElevation = GpsTrack.ElevationOrdering.min(trackPoints).getElevation().get();
         double maximumElevation = GpsTrack.ElevationOrdering.max(trackPoints).getElevation().get();
 
-        statPoints.add(new StatPoint("Minimum Elevation", df.format(minimumElevation) + "m" ));
-        statPoints.add(new StatPoint("Maximum Elevation", df.format(maximumElevation) + "m" ));
+        statPoints.add(new StatPoint("Minimum Elevation", df.format(minimumElevation) + "m", "Lowest recorded elevation" ));
+        statPoints.add(new StatPoint("Maximum Elevation", df.format(maximumElevation) + "m", "Highest recorded elevation" ));
 
 
         double avgElevation = 0;
@@ -311,7 +312,7 @@ public class StatsFragment extends Fragment {
         }
 
         avgElevation = avgElevation/trackPoints.size();
-        statPoints.add(new StatPoint("Average Elevation",df.format(avgElevation) + "m" ));
+        statPoints.add(new StatPoint("Average Elevation",df.format(avgElevation) + "m", "Average elevation across all the points" ));
 
         double climbing = 0;
         double descending = 0;
@@ -328,9 +329,9 @@ public class StatsFragment extends Fragment {
             }
         }
 
-        statPoints.add(new StatPoint("Total Climbing", df.format(climbing) + "m"));
-        statPoints.add(new StatPoint("Total Descending", df.format(descending) + "m"));
-        statPoints.add(new StatPoint("Net Ascent", df.format(climbing - descending) + "m"));
+        statPoints.add(new StatPoint("Total Climbing", df.format(climbing) + "m", "Total upwards climbing distance"));
+        statPoints.add(new StatPoint("Total Descending", df.format(descending) + "m", "Total descending distance"));
+        statPoints.add(new StatPoint("Net Ascent", df.format(climbing - descending) + "m", "Climbing distance - descending distance"));
 
         return statPoints;
     }
@@ -343,7 +344,7 @@ public class StatsFragment extends Fragment {
             return;
         }
 
-        List<StatPoint> statPoints = Lists.newLinkedList();
+        statPoints = Lists.newLinkedList();
 
         LinearLayout layout = (LinearLayout)rootView.findViewById(R.id.linear_layout_stats_fragment);
         if(statType == StatType.DISTANCE){
@@ -369,7 +370,7 @@ public class StatsFragment extends Fragment {
         }
 
 
-        StaggeredGridView staggeredGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
+        staggeredGridView = (StaggeredGridView) rootView.findViewById(R.id.grid_view);
         StatsAdapter statsAdapter = new StatsAdapter(rootView.getContext(), R.id.txt_line1);
 
         LayoutInflater inflater = (LayoutInflater) rootView.getContext().getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -384,6 +385,7 @@ public class StatsFragment extends Fragment {
         layout.clearAnimation();
 
         staggeredGridView.setAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.fade));
+        staggeredGridView.setOnItemClickListener(this);
         staggeredGridView.setAdapter(statsAdapter);
     }
 
@@ -399,6 +401,17 @@ public class StatsFragment extends Fragment {
 
     }
 
+    @Override
+    public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+        Log.d("GPSVisualizer", statPoints.get(i).Description);
+        if(toast != null){
+            toast.cancel();
+        }
+
+        toast = Toast.makeText(getActivity(), statPoints.get(i).Description, Toast.LENGTH_LONG );
+        toast.show();
+    }
+
     private enum StatType {
          DISTANCE,
          ELEVATION ,
@@ -407,11 +420,13 @@ public class StatsFragment extends Fragment {
     }
 
     private class StatPoint {
-        public StatPoint(String title, String value){
+        public StatPoint(String title, String value, String description){
             Title = title;
             Value = value;
+            Description = description;
         }
         public String Title = "";
         public String Value = "";
+        public String Description = "";
     }
 }
