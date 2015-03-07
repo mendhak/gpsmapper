@@ -36,7 +36,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     private GoogleMap googleMap;
     private View rootView;
     private GpsTrack track;
-    private static boolean visibleToUser;
+    boolean showCircles;
     private List<LatLng> gmapLatLongs;
     private static int mapType = GoogleMap.MAP_TYPE_NORMAL;
 
@@ -80,7 +80,11 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
 
     @Override
     public void onResume() {
+
         super.onResume();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
+        showCircles = prefs.getBoolean("pref_map_showcircles", false);
 
         mapView.onResume();
 
@@ -167,7 +171,7 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-        visibleToUser = isVisibleToUser;
+        boolean visibleToUser = isVisibleToUser;
 
         if (visibleToUser) {
             Log.d("GPSVisualizer", "Map Fragment is now visible");
@@ -190,11 +194,6 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
             @Override
             public void onCameraChange(CameraPosition cameraPosition) {
-
-
-
-                SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getActivity());
-                boolean showCircles = prefs.getBoolean("pref_map_showcircles", false);
 
                 Log.d("GPSVisualizer", String.valueOf( cameraPosition.zoom));
                 Log.d("GPSVisualizer", String.valueOf(showCircles));
