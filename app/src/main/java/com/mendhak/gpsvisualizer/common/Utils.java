@@ -85,4 +85,21 @@ public class Utils {
 
         return result;
     }
+
+    public static String GetTimeDisplay(long milliseconds) {
+
+        double ms = (double)milliseconds;
+        DecimalFormat df = new DecimalFormat("#.##");
+
+        String result = df.format(ms/1000) + " s";
+
+        if(ms > 3600000){
+            result = df.format(ms/3600000) + " hrs";
+        }
+        else if(ms > 60000){
+            result = df.format(ms/60000) + " min";
+        }
+
+        return result;
+    }
 }

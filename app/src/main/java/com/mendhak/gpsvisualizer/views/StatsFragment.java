@@ -238,7 +238,7 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
 
         long timeDifferenceMillis = Iterables.getLast(trackPoints).getCalendar().getTimeInMillis() - Iterables.getFirst(trackPoints,null).getCalendar().getTimeInMillis();
 
-        statPoints.add(new StatPoint("Total time", String.valueOf(timeDifferenceMillis/60000) + " min", "Total recording time"));
+        statPoints.add(new StatPoint("Total time", Utils.GetTimeDisplay(timeDifferenceMillis), "Total recording time"));
 
         //Remove unelevated points for elevation based time calculations
         trackPoints = Lists.newArrayList(GpsTrack.ElevationFilter(trackPoints));
@@ -259,18 +259,18 @@ public class StatsFragment extends Fragment implements AdapterView.OnItemClickLi
             }
 
             if(climbingTime>0){
-                statPoints.add(new StatPoint("Climbing Time",  String.valueOf(climbingTime/60000) + " min", "Time spent climbing"));
+                statPoints.add(new StatPoint("Climbing Time",  Utils.GetTimeDisplay(climbingTime), "Time spent climbing"));
             }
 
             if(descendingTime>0){
-                statPoints.add(new StatPoint("Descent Time",  String.valueOf(descendingTime/60000) + " min", "Time spent descending"));
+                statPoints.add(new StatPoint("Descent Time",  Utils.GetTimeDisplay(descendingTime), "Time spent descending"));
             }
 
             if(flatGroundTime>0){
-                statPoints.add(new StatPoint("Flat Ground Time",  String.valueOf(flatGroundTime/60000) + " min", "Time spent on flat ground"));
+                statPoints.add(new StatPoint("Flat Ground Time",  Utils.GetTimeDisplay(flatGroundTime), "Time spent on flat ground"));
             }
 
-            statPoints.add(new StatPoint("Time with elevation",  String.valueOf((climbingTime + descendingTime + flatGroundTime)/60000) + " min", "Total time going up, down and flat"));
+            statPoints.add(new StatPoint("Time with elevation",  Utils.GetTimeDisplay((climbingTime + descendingTime + flatGroundTime)), "Total time going up, down and flat"));
         }
 
 

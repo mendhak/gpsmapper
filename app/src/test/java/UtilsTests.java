@@ -66,5 +66,16 @@ public class UtilsTests  extends TestCase {
         assertEquals("0.501 mi", Utils.GetDistanceDisplay(807, true));
     }
 
+    public final void test_GetTimeDisplay_SmallTimes_Seconds(){
+        assertEquals("4 s", Utils.GetTimeDisplay(4000));
+    }
+
+    public final void test_GetTimeDisplay_MediumTimes_Minutes(){
+        assertEquals("2.2 min", Utils.GetTimeDisplay(132000));
+    }
+
+    public final void test_GetTimeDisplay_LargeTimes_Hours(){
+        assertEquals("1.9 hrs", Utils.GetTimeDisplay(6840000));
+    }
 
 }
