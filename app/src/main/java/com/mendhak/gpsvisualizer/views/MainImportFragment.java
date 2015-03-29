@@ -4,11 +4,7 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
-import android.content.ContentResolver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentSender;
-import android.content.pm.PackageManager;
+import android.content.*;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -158,6 +154,14 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             Log.e("GPSVisualizer", "Could not determine GPSLogger's files dir", e);
         }
 
+        if(!Prefs.ShouldAlwaysOpenGPSLoggerFolder(getActivity())){
+            File lastSelectedFile = new File(Uri.parse(Prefs.GetLastOpenedFile(getActivity())).getPath());
+            if(lastSelectedFile != null && !lastSelectedFile.getPath().isEmpty()){
+                gpsLoggerFilePath = new File(lastSelectedFile.getParent());
+            }
+
+        }
+
         if(Utils.IsPackageInstalled("com.estrongs.android.pop", getActivity())){
             mediaIntent = new Intent("com.estrongs.action.PICK_FILE");
             mediaIntent.putExtra("com.estrongs.intent.extra.TITLE", "Select GPX/NMEA file");
@@ -245,6 +249,12 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
             selectedLocalFile=uri;
             selectedGoogleDriveFile=null;
+
+            if(!Prefs.ShouldAlwaysOpenGPSLoggerFolder(getActivity())){
+                Log.d("GPSVisualizer", "Saving user selected path");
+                Prefs.SetLastOpenedFile(uri, getActivity());
+            }
+
             new FileProcessor().execute(uri);
         }
 

@@ -8,7 +8,7 @@
         android:defaultValue="false"/>
 
     <CheckBoxPreference
-        android:key="pref_gpslogger_folder"
+        android:key="pref_always_open_gpslogger_folder"
         android:title="Always open GPSLogger's path"
         android:summary="Open Local File will always open GPSLogger's folder. If unchecked, it will remember your last opened path."
         android:defaultValue="true"/>
