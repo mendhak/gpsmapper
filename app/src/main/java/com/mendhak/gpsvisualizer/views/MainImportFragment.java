@@ -4,10 +4,12 @@ import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.Fragment;
 import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -138,10 +140,19 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         Intent mediaIntent = null;
 
         try {
-            gpsLoggerFilePath = getActivity()
-                    .createPackageContext("com.mendhak.gpslogger",
-                            Context.CONTEXT_IGNORE_SECURITY)
-                    .getExternalFilesDir(null);
+
+            String URL = "content://com.mendhak.gpslogger/gpslogger_folder";
+            Uri u = Uri.parse(URL);
+            Cursor c = getActivity().getContentResolver().query(u,null,null,null,null);
+            if(c != null){
+                c.moveToFirst();
+                while(!c.isAfterLast()){
+                    Log.d("GPSVisualizer", c.getString(0));
+                    gpsLoggerFilePath = new File(c.getString(0));
+                    c.moveToNext();
+                }
+                c.close();
+            }
 
         } catch (Exception e) {
             Log.e("GPSVisualizer", "Could not determine GPSLogger's files dir", e);
