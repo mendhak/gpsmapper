@@ -143,7 +143,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                             Context.CONTEXT_IGNORE_SECURITY)
                     .getExternalFilesDir(null);
 
-        } catch (PackageManager.NameNotFoundException e) {
+        } catch (Exception e) {
             Log.e("GPSVisualizer", "Could not determine GPSLogger's files dir", e);
         }
 
