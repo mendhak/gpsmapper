@@ -378,10 +378,10 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                 final String importedFileName = metadataResult.getMetadata().getTitle();
 
 
-                file.openContents(googleApiClient, DriveFile.MODE_READ_ONLY, listener)
-                        .setResultCallback(new ResultCallback<DriveApi.ContentsResult>() {
+                file.open(googleApiClient, DriveFile.MODE_READ_ONLY, listener)
+                        .setResultCallback(new ResultCallback<DriveApi.DriveContentsResult>() {
                             @Override
-                            public void onResult(DriveApi.ContentsResult contentsResult) {
+                            public void onResult(DriveApi.DriveContentsResult contentsResult) {
 
                                 if (!contentsResult.getStatus().isSuccess()) {
                                     downloadProgress.setMessage("Failed");
@@ -393,7 +393,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
                                 downloadProgress.setProgress(100);
                                 downloadProgress.hide();
 
-                                Contents contents = contentsResult.getContents();
+                                DriveContents contents = contentsResult.getDriveContents();
                                 String fileContents = convertStreamToString(contents.getInputStream());
 
                                 ProcessUserGpsFile(fileContents, importedFileName);

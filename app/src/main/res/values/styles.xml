@@ -5,4 +5,38 @@
         <!-- Customize your theme here. -->
     </style>
 
+
+    <!-- You can also inherit from NNF_BaseTheme.Light -->
+    <style name="FilePicker.Theme" parent="NNF_BaseTheme">
+        <!-- Set these to match your theme -->
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark</item>
+        <item name="colorAccent">@color/accentColor</item>
+
+        <!-- Need to set this also to style create folder dialog -->
+        <item name="alertDialogTheme">@style/FilePickerAlertDialogTheme</item>
+
+        <!-- If you want to set a specific toolbar theme, do it here -->
+        <!-- <item name="nnf_toolbarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item> -->
+    </style>
+
+    <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+        <item name="colorPrimary">@color/primaryColor</item>
+        <item name="colorPrimaryDark">@color/primaryColorDark</item>
+        <item name="colorAccent">@color/accentColor</item>
+    </style>
+
+
+    <color name="primaryColor">#607d8b</color>
+    <color name="primaryColorDark">#455a64</color>
+    <color name="accentColor">#448aff</color>
+    <color name="errorColor">#FF5252</color>
+    <color name="warningColor">#ffbd60</color>
+    <color name="accentColorComplementary">#4CAF50</color>
+    <color name="primaryColorLight">#CFD8DC</color>
+    <color name="primaryColorText">#212121</color>
+    <color name="secondaryColorText">#727272</color>
+    <color name="icons">#FFFFFF</color>
+    <color name="divider">#B6B6B6</color>
+
 </resources>

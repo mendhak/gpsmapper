@@ -1,15 +1,17 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 20
-    buildToolsVersion "20.0.0"
+    compileSdkVersion 23
+    buildToolsVersion "21.1.2"
 
     defaultConfig {
         applicationId "com.mendhak.gpsvisualizer"
         minSdkVersion 15
-        targetSdkVersion 20
+        targetSdkVersion 21
         versionCode 6
         versionName "6"
+
+        multiDexEnabled true
     }
     buildTypes {
         release {
@@ -50,6 +52,11 @@ android {
             }
         }
     }
+
+    //Predexing libraries takes up too much memory and causes travis-ci to choke
+    dexOptions {
+        preDexLibraries = false
+    }
 }
 
 dependencies {
@@ -59,12 +66,23 @@ dependencies {
     compile fileTree(dir: './src/main/libs', include: '*.jar')
 
     compile 'com.android.support:support-v13:20.0.0'
-    compile 'com.google.android.gms:play-services:6.1.11'
-    compile 'com.android.support:appcompat-v7:20.0.0'
+    compile 'com.google.android.gms:play-services:7.8.0'
+    compile 'com.android.support:appcompat-v7:23.1.0'
     compile 'com.google.guava:guava:18.0'
     compile 'com.etsy.android.grid:library:1.0.5'
-    compile 'com.android.support:support-v4:20.0.0'
-    compile 'com.nononsenseapps:filepicker:+'
+    compile 'com.android.support:support-v4:23.1.0'
+    compile 'com.nononsenseapps:filepicker:2.4.2'
 
     testCompile 'junit:junit:4.12'
+}
+
+tasks.whenTaskAdded { task ->
+    //Don't run lint. Takes too long.
+    if (task.name.contains("lint")) {
+        task.enabled = false
+    }
+
+    if (task.name.contains("test")) {
+        task.enabled = false
+    }
 }
