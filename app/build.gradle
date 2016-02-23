@@ -37,6 +37,10 @@ android {
         buildTypes {
             release {
                 signingConfig signingConfigs.release
+                resValue "string", "google_maps_api_key", GPSV_RELEASE_GMAPS_APIKEY
+            }
+            debug{
+                resValue "string", "google_maps_api_key", GPSV_DEBUG_GMAPS_APIKEY
             }
         }
     }
