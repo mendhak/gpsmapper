@@ -81,7 +81,7 @@ public class SettingsActivity extends PreferenceActivity {
         pref_issue.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                String url = "https://bitbucket.org/mendhak/gpsvisualizer/issues?status=new&status=open";
+                String url = "https://github.com/mendhak/gpsvisualizer/issues";
                 Intent i = new Intent(Intent.ACTION_VIEW);
                 i.setData(Uri.parse(url));
                 startActivity(i);
