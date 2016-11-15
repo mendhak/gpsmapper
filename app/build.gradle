@@ -82,6 +82,7 @@ android {
 
     //Predexing libraries takes up too much memory and causes travis-ci to choke
     dexOptions {
+        javaMaxHeapSize "4g"
         preDexLibraries = false
     }
 }
@@ -93,7 +94,7 @@ dependencies {
     compile fileTree(dir: './src/main/libs', include: '*.jar')
 
     compile 'com.android.support:support-v13:25.0.1'
-    compile 'com.google.android.gms:play-services:7.8.0'
+    compile 'com.google.android.gms:play-services:9.8.0'
     compile 'com.android.support:appcompat-v7:25.0.1'
     compile 'com.google.guava:guava:18.0'
     compile 'com.etsy.android.grid:library:1.0.5'

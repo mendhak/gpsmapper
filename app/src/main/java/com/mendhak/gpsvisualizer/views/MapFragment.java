@@ -15,10 +15,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.MapView;
-import com.google.android.gms.maps.MapsInitializer;
+import com.google.android.gms.maps.*;
 import com.google.android.gms.maps.model.*;
 import com.google.common.base.Function;
 import com.google.common.collect.Iterables;
@@ -30,7 +27,7 @@ import com.mendhak.gpsvisualizer.common.ProcessedData;
 
 import java.util.List;
 
-public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedCallback {
+public  class MapFragment extends BaseFragment implements OnMapReadyCallback {
 
     MapView mapView;
     private GoogleMap googleMap;
@@ -183,17 +180,17 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
     }
 
     private void SetupMap(){
-        googleMap = mapView.getMap();
-        googleMap.setOnMapLoadedCallback(this);
+        mapView.getMapAsync(this);
     }
 
     private void RenderMap(){
         googleMap.clear();
         googleMap.setMapType(mapType);
 
-        googleMap.setOnCameraChangeListener(new GoogleMap.OnCameraChangeListener() {
+        googleMap.setOnCameraMoveListener(new GoogleMap.OnCameraMoveListener() {
             @Override
-            public void onCameraChange(CameraPosition cameraPosition) {
+            public void onCameraMove() {
+                CameraPosition cameraPosition = googleMap.getCameraPosition();
 
                 Log.d("GPSVisualizer", String.valueOf( cameraPosition.zoom));
                 Log.d("GPSVisualizer", String.valueOf(showCircles));
@@ -225,7 +222,6 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
 
                     }
                 }
-
             }
         });
 
@@ -272,8 +268,14 @@ public  class MapFragment extends BaseFragment implements GoogleMap.OnMapLoadedC
         }
     }
 
+//    @Override
+//    public void onMapLoaded() {
+//        RenderMap();
+//    }
+
     @Override
-    public void onMapLoaded() {
+    public void onMapReady(GoogleMap googleMap) {
+        this.googleMap = googleMap;
         RenderMap();
     }
 }
