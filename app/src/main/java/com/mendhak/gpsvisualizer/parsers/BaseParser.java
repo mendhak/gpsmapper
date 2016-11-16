@@ -8,7 +8,7 @@ import java.io.InputStream;
 
 public abstract class BaseParser {
 
-    abstract GpsTrack GetTrack(InputStream stream);
+    public abstract GpsTrack GetTrack(InputStream stream);
 
 
     public void Parse(InputStream stream, IDataImportListener callback){

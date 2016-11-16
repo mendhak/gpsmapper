@@ -34,6 +34,10 @@ import com.nononsenseapps.filepicker.FilePickerActivity;
 
 
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 public class MainImportFragment extends Fragment implements View.OnClickListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, IFileSelectedListener {
@@ -44,7 +48,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     public static int GDRIVE_REQUEST_CODE_OPENER = 39;
     private View rootView;
     private IDataImportListener dataImportListener;
-    private Uri selectedLocalFile;
+    private ArrayList<Uri> selectedLocalFiles;
     private DriveId selectedGoogleDriveFile;
 
     ProgressDialog parserProgress;
@@ -92,7 +96,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         Uri pendingFile = dataImportListener.GetPendingExternalFile();
         if(pendingFile != null){
-            OnFileSelected(pendingFile);
+            OnFileSelected(new ArrayList<Uri>( Arrays.asList(pendingFile)));
         }
     }
 
@@ -125,7 +129,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             parserProgress.setProgress(0);
             parserProgress.setMax(100);
             parserProgress.show();
-            new FileProcessor().execute(selectedLocalFile);
+            new FileProcessor(selectedLocalFiles).execute();
         }
 
     }
@@ -172,7 +176,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         } else {
             mediaIntent = new Intent(getActivity(), FilePickerActivity.class);
-            mediaIntent.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, false);
+            mediaIntent.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, true);
             mediaIntent.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
             mediaIntent.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
 
@@ -237,25 +241,35 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == ACTION_FILE_PICKER  && resultCode == Activity.RESULT_OK) {
-            Uri uri = data.getData();
-            Log.d("GPSVisualizer", "File URI= " + uri);
 
-            parserProgress.setCancelable(true);
-            parserProgress.setMessage("Parsing ...");
-            parserProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
-            parserProgress.setProgress(0);
-            parserProgress.setMax(100);
-            parserProgress.show();
+            ArrayList<Uri> chosenFiles = new ArrayList<>();
+            ClipData clip = data.getClipData();
 
-            selectedLocalFile=uri;
-            selectedGoogleDriveFile=null;
+            if (clip != null) {
+                for (int i = 0; i < clip.getItemCount(); i++) {
+                    Uri uri = clip.getItemAt(i).getUri();
+                    Log.d("GPSVisualizer", "File URI= " + uri);
+                    chosenFiles.add(uri);
+                }
 
-            if(!Prefs.ShouldAlwaysOpenGPSLoggerFolder(getActivity())){
-                Log.d("GPSVisualizer", "Saving user selected path");
-                Prefs.SetLastOpenedFile(uri, getActivity());
+                parserProgress.setCancelable(true);
+                parserProgress.setMessage("Parsing ...");
+                parserProgress.setProgressStyle(ProgressDialog.STYLE_SPINNER);
+                parserProgress.setProgress(0);
+                parserProgress.setMax(100);
+                parserProgress.show();
+
+                selectedLocalFiles = chosenFiles;
+                selectedGoogleDriveFile=null;
+
+                if(!Prefs.ShouldAlwaysOpenGPSLoggerFolder(getActivity())){
+                    Log.d("GPSVisualizer", "Saving user selected path");
+                    Prefs.SetLastOpenedFile(chosenFiles.get(0), getActivity());
+                }
+
+                new FileProcessor(chosenFiles).execute();
             }
 
-            new FileProcessor().execute(uri);
         }
 
         if (requestCode == GDRIVE_RESOLVE_CONNECTION_REQUEST_CODE && resultCode == getActivity().RESULT_OK) {
@@ -263,37 +277,68 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         }
     }
 
-    private class FileProcessor extends AsyncTask<Uri, Void, Void>{
+    private class FileProcessor extends AsyncTask<Void, Void, Void>{
+
+        private ArrayList<Uri> chosenFiles;
+
+        FileProcessor(ArrayList<Uri> chosenFiles){
+            this.chosenFiles = chosenFiles;
+        }
+
         @Override
-        protected Void doInBackground(Uri... uris) {
-            ProcessUserGpsFile(uris[0]);
+        protected Void doInBackground(Void...params) {
+            ProcessUserGpsFile(chosenFiles);
             return null;
         }
     }
 
-    public void ProcessUserGpsFile(Uri uri) {
+    public void ProcessUserGpsFile(ArrayList<Uri> chosenFiles) {
 
-        final File gpsFile = new File(uri.getPath());
+        GpsTrack mainTrack = new GpsTrack();
 
-        BaseParser parser = BaseParser.GetParserFromFilename(gpsFile.getPath());
+        for(Uri uri : chosenFiles){
+            final File gpsFile = new File(uri.getPath());
+            BaseParser parser = BaseParser.GetParserFromFilename(gpsFile.getPath());
 
-        try {
-            parser.Parse(new FileInputStream(gpsFile), dataImportListener);
+
+            try {
+                GpsTrack t = parser.GetTrack(new FileInputStream(gpsFile));
+                mainTrack.getTrackPoints().addAll(t.getTrackPoints());
+                mainTrack.getWayPoints().addAll(t.getWayPoints());
+
+                Collections.sort(mainTrack.getTrackPoints(), new Comparator<GpsPoint>() {
+                    @Override
+                    public int compare(GpsPoint first, GpsPoint second) {
+                        return first.getCalendar().compareTo(second.getCalendar());
+                    }
+                });
+
+                Collections.sort(mainTrack.getWayPoints(), new Comparator<GpsPoint>() {
+                    @Override
+                    public int compare(GpsPoint first, GpsPoint second) {
+                        return first.getCalendar().compareTo(second.getCalendar());
+                    }
+                });
 
 
-        } catch (Exception e) {
-            Log.e("GPSVisualizer", "Could not parse file. ", e);
+
+            } catch (Exception e) {
+                Log.e("GPSVisualizer", "Could not parse file. ", e);
+            }
         }
 
-        getActivity().runOnUiThread(new FileImportMessage(gpsFile.getName()));
+
+        dataImportListener.OnDataImported(mainTrack);
+
+        getActivity().runOnUiThread(new FileImportMessage(chosenFiles));
     }
 
     private class FileImportMessage implements Runnable {
 
-        private String fileName;
+        private ArrayList<Uri>  chosenFiles;
 
-        public FileImportMessage(String fileName){
-            this.fileName = fileName;
+        public FileImportMessage(ArrayList<Uri> chosenFiles){
+            this.chosenFiles = chosenFiles;
         }
 
         @Override
@@ -302,7 +347,13 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             parserProgress.hide();
             TextView txtIntroduction = (TextView) rootView.findViewById(R.id.import_message);
             Button btnReload = (Button)rootView.findViewById(R.id.btn_reload);
-            String importedText = "<strong>Imported " + this.fileName + "</strong>";
+            StringBuilder importedNames = new StringBuilder();
+            for(Uri chosenFile : chosenFiles){
+                importedNames.append(new File(chosenFile.getPath()).getName());
+                importedNames.append(",");
+            }
+            importedNames.deleteCharAt(importedNames.length() - 1);
+            String importedText = "<strong>Imported " + importedNames.toString() + "</strong>";
 
             if(!ProcessedData.isQualityTrack()){
                 importedText += "<br />Your track does not have many elevation points. You can still view the map, " +
@@ -327,15 +378,19 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
         Gpx10Parser parser = new Gpx10Parser();
         parser.Parse(stream, dataImportListener);
 
-        getActivity().runOnUiThread(new FileImportMessage(fileName));
+
+
+        ArrayList<Uri> chosenFiles = new ArrayList<Uri>();
+                chosenFiles.add(Uri.parse(fileName));
+        getActivity().runOnUiThread(new FileImportMessage(new ArrayList<Uri>(Arrays.asList(Uri.parse(fileName)))));
     }
 
 
     @Override
-    public void OnFileSelected(Uri uri) {
-        selectedLocalFile = uri;
+    public void OnFileSelected(ArrayList<Uri> chosenFiles) {
+        selectedLocalFiles = chosenFiles;
         selectedGoogleDriveFile=null;
-        ProcessUserGpsFile(uri);
+        ProcessUserGpsFile(chosenFiles);
     }
 
 
