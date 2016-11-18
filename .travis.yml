@@ -14,9 +14,6 @@ android:
 
 jdk: oraclejdk8
 
-env:
-  - GPSV_RELEASE_GMAPS_APIKEY=test GPSV_DEBUG_GMAPS_APIKEY=test RELEASE_STORE_FILE=test
-
 notifications:
   email: false
 
