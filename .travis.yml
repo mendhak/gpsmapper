@@ -1,0 +1,27 @@
+sudo: false
+language: android
+android:
+  components:
+    - tools
+    - platform-tools
+    - tools
+    - build-tools-25.0.0
+    - android-25
+    - extra-android-support
+    - extra-google-google_play_services
+    - extra-google-m2repository
+    - extra-android-m2repository
+
+jdk: oraclejdk8
+
+env:
+  - GPSV_RELEASE_GMAPS_APIKEY=test GPSV_DEBUG_GMAPS_APIKEY=test RELEASE_STORE_FILE=test
+
+notifications:
+  email: false
+
+before_install:
+  - ./gradlew --version
+
+script:
+  - ./gradlew check
