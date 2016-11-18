@@ -23,6 +23,7 @@ repositories {
     maven {
         url "https://plugins.gradle.org/m2/"
     }
+    maven { url "https://jitpack.io" }
 }
 
 android {
@@ -90,7 +91,6 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['**.jar'])
     compile files('libs/oceanebelle.parser.engine.jar')
     compile fileTree(dir: './src/main/libs', include: '*.aar')
     compile fileTree(dir: './src/main/libs', include: '*.jar')
@@ -102,6 +102,9 @@ dependencies {
     compile 'com.etsy.android.grid:library:1.0.5'
     compile 'com.android.support:support-v4:25.0.1'
     compile 'com.nononsenseapps:filepicker:2.4.2'
+
+    compile 'com.github.lecho:hellocharts-library:1.5.8@aar'
+    compile 'com.github.oceanebelle.nmeaparser:oceanebelle.parser.engine:-SNAPSHOT'
 
     testCompile 'junit:junit:4.12'
     testCompile 'org.mockito:mockito-core:1.10.19'

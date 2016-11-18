@@ -29,7 +29,7 @@ import java.text.SimpleDateFormat;
 import java.util.List;
 
 import lecho.lib.hellocharts.model.*;
-import lecho.lib.hellocharts.util.Utils;
+import lecho.lib.hellocharts.util.ChartUtils;
 import lecho.lib.hellocharts.view.LineChartView;
 
 
@@ -125,7 +125,7 @@ public class ChartFragment extends Fragment{
     private void applyToLineChart(ChartParameters params){
         //Create the lines with attributes and data
         Line trackpointLine = new Line(params.TrackPointValues);
-        trackpointLine.setColor(Utils.COLORS[0]);
+        trackpointLine.setColor(ChartUtils.COLORS[0]);
         trackpointLine.setShape(ValueShape.CIRCLE);
         trackpointLine.setCubic(true);
         trackpointLine.setFilled(false);
@@ -135,7 +135,7 @@ public class ChartFragment extends Fragment{
         trackpointLine.setHasPoints(false);
 
         Line waypointLine = new Line(params.WayPointValues);
-        waypointLine.setColor(Utils.COLOR_RED);
+        waypointLine.setColor(ChartUtils.COLOR_RED);
         waypointLine.setShape(ValueShape.SQUARE);
         waypointLine.setHasLabels(true);
         waypointLine.setHasLabelsOnlyForSelected(true);
@@ -179,14 +179,14 @@ public class ChartFragment extends Fragment{
 
 
         //Set Y-axis top and bottom
-        final Viewport v = new Viewport(chart.getMaxViewport());
+        final Viewport v = new Viewport(chart.getMaximumViewport());
         v.top = params.YAxisTop;
         v.bottom = params.YAxisBottom;
         v.left = params.XAxisLeft;
         v.right = params.XAxisRight;
 
-        chart.setMaxViewport(v);
-        chart.setCurrentViewport(v, true);
+        chart.setMaximumViewport(v);
+        chart.setCurrentViewport(v);
 
         chart.startDataAnimation();
         chart.setAnimation(AnimationUtils.loadAnimation(getActivity(),R.anim.fade));
