@@ -50,7 +50,7 @@ android {
         abortOnError false
     }
 
-    if (project.hasProperty("RELEASE_STORE_FILE") || System.getenv("RELEASE_STORE_FILE")) {
+    if (project.hasProperty("RELEASE_STORE_FILE")) {
         signingConfigs {
             release {
                 storeFile file(RELEASE_STORE_FILE)
@@ -60,17 +60,19 @@ android {
             }
         }
 
-
         buildTypes {
 
             release {
                 signingConfig signingConfigs.release
-                resValue "string", "google_maps_api_key", project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY') ? GPSV_RELEASE_GMAPS_APIKEY : System.getenv('GPSV_RELEASE_GMAPS_APIKEY')
+                resValue "string", "google_maps_api_key", GPSV_RELEASE_GMAPS_APIKEY
             }
             debug{
-                resValue "string", "google_maps_api_key", project.hasProperty('GPSV_DEBUG_GMAPS_APIKEY') ? GPSV_DEBUG_GMAPS_APIKEY : System.getenv('GPSV_DEBUG_GMAPS_APIKEY')
+                resValue "string", "google_maps_api_key", GPSV_DEBUG_GMAPS_APIKEY
             }
         }
+    }
+    else {
+        resValue "string", "google_maps_api_key", ""
     }
 
 
