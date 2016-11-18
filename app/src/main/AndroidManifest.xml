@@ -65,7 +65,7 @@
         </activity>
 
         <activity
-            android:name="com.nononsenseapps.filepicker.FilePickerActivity"
+            android:name=".views.SortedFilePickerActivity"
             android:label="@string/app_name"
             android:theme="@style/FilePicker.Theme">
         </activity>

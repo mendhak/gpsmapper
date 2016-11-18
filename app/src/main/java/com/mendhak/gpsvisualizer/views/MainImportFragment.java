@@ -165,13 +165,13 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
             }
         }
 
-        mediaIntent = new Intent(getActivity(), FilePickerActivity.class);
-        mediaIntent.putExtra(FilePickerActivity.EXTRA_ALLOW_MULTIPLE, true);
-        mediaIntent.putExtra(FilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
-        mediaIntent.putExtra(FilePickerActivity.EXTRA_MODE, FilePickerActivity.MODE_FILE);
+        mediaIntent = new Intent(getActivity(), SortedFilePickerActivity.class);
+        mediaIntent.putExtra(SortedFilePickerActivity.EXTRA_ALLOW_MULTIPLE, true);
+        mediaIntent.putExtra(SortedFilePickerActivity.EXTRA_ALLOW_CREATE_DIR, false);
+        mediaIntent.putExtra(SortedFilePickerActivity.EXTRA_MODE, SortedFilePickerActivity.MODE_FILE);
 
         if (gpsLoggerFilePath != null && gpsLoggerFilePath.isDirectory()) {
-            mediaIntent.putExtra(FilePickerActivity.EXTRA_START_PATH, gpsLoggerFilePath.getPath());
+            mediaIntent.putExtra(SortedFilePickerActivity.EXTRA_START_PATH, gpsLoggerFilePath.getPath());
         }
 
         startActivityForResult(mediaIntent, ACTION_FILE_PICKER);
