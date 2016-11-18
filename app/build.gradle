@@ -72,7 +72,15 @@ android {
         }
     }
     else {
-        resValue "string", "google_maps_api_key", ""
+        buildTypes {
+
+            release {
+                resValue "string", "google_maps_api_key", ""
+            }
+            debug{
+                resValue "string", "google_maps_api_key", ""
+            }
+        }
     }
 
 
