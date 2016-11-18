@@ -50,33 +50,26 @@ android {
         abortOnError false
     }
 
-    if (project.hasProperty("RELEASE_STORE_FILE")) {
-        signingConfigs {
-            release {
-                storeFile file(RELEASE_STORE_FILE)
-                storePassword RELEASE_STORE_PASSWORD
-                keyAlias RELEASE_KEY_ALIAS
-                keyPassword RELEASE_KEY_PASSWORD
-            }
-        }
-
-        buildTypes {
-
-            println "project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY'):" + project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY')
-            println "project.hasProperty('GPSV_DEBUG_GMAPS_APIKEY'):" + project.hasProperty('GPSV_DEBUG_GMAPS_APIKEY')
-            println "System.getenv('GPSV_RELEASE_GMAPS_APIKEY'):" + System.getenv('GPSV_RELEASE_GMAPS_APIKEY')
-            println "System.getenv('GPSV_DEBUG_GMAPS_APIKEY'):" + System.getenv('GPSV_DEBUG_GMAPS_APIKEY')
-
-
-            release {
-                signingConfig signingConfigs.release
-                resValue "string", "google_maps_api_key", project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY') ? GPSV_RELEASE_GMAPS_APIKEY : System.getenv('GPSV_RELEASE_GMAPS_APIKEY')
-            }
-            debug{
-                resValue "string", "google_maps_api_key", project.hasProperty('GPSV_DEBUG_GMAPS_APIKEY') ? GPSV_DEBUG_GMAPS_APIKEY : System.getenv('GPSV_DEBUG_GMAPS_APIKEY')
-            }
+    signingConfigs {
+        release {
+            storeFile file(RELEASE_STORE_FILE)
+            storePassword RELEASE_STORE_PASSWORD
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
         }
     }
+
+    buildTypes {
+
+        release {
+            signingConfig signingConfigs.release
+            resValue "string", "google_maps_api_key", project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY') ? GPSV_RELEASE_GMAPS_APIKEY : System.getenv('GPSV_RELEASE_GMAPS_APIKEY')
+        }
+        debug{
+            resValue "string", "google_maps_api_key", project.hasProperty('GPSV_DEBUG_GMAPS_APIKEY') ? GPSV_DEBUG_GMAPS_APIKEY : System.getenv('GPSV_DEBUG_GMAPS_APIKEY')
+        }
+    }
+
 
     assembleRelease.doLast {
         copy {
