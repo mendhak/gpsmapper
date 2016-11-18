@@ -62,6 +62,12 @@ android {
 
         buildTypes {
 
+            println "project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY'):" + project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY')
+            println "project.hasProperty('GPSV_DEBUG_GMAPS_APIKEY'):" + project.hasProperty('GPSV_DEBUG_GMAPS_APIKEY')
+            println "System.getenv('GPSV_RELEASE_GMAPS_APIKEY'):" + System.getenv('GPSV_RELEASE_GMAPS_APIKEY')
+            println "System.getenv('GPSV_DEBUG_GMAPS_APIKEY'):" + System.getenv('GPSV_DEBUG_GMAPS_APIKEY')
+
+
             release {
                 signingConfig signingConfigs.release
                 resValue "string", "google_maps_api_key", project.hasProperty('GPSV_RELEASE_GMAPS_APIKEY') ? GPSV_RELEASE_GMAPS_APIKEY : System.getenv('GPSV_RELEASE_GMAPS_APIKEY')
