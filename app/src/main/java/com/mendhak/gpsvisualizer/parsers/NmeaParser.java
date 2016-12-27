@@ -46,6 +46,11 @@ public class NmeaParser extends BaseParser {
 
 
                 if(nmeaDataAdapter.isChecksumValid()){
+
+                    if(!ggaPoints.isEmpty()){
+                        accumulatedDistance += Utils.CalculateDistance(nmeaDataAdapter.getCoordinates().getLatitude(),nmeaDataAdapter.getCoordinates().getLongitude(), ggaPoints.get(ggaPoints.size()-1).getLatitude(), ggaPoints.get(ggaPoints.size()-1).getLongitude());
+                    }
+
                     ggaPoints.add(GpsPoint.from(
                             nmeaDataAdapter.getCoordinates().getLatitude(),
                             nmeaDataAdapter.getCoordinates().getLongitude(),
