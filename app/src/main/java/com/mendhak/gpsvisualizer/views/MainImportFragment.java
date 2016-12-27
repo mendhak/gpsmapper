@@ -24,6 +24,8 @@ import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.drive.*;
+import com.google.android.gms.drive.query.Filters;
+import com.google.android.gms.drive.query.SearchableField;
 import com.google.common.base.Charsets;
 import com.mendhak.gpsvisualizer.MainActivity;
 import com.mendhak.gpsvisualizer.R;
@@ -194,7 +196,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         IntentSender intentSender = Drive.DriveApi
                 .newOpenFileActivityBuilder()
-                .setMimeType(new String[]{"application/vnd.google-earth.gpx+xml", "text/xml", "text/plain", "text/*", "application/gpx+xml", "application/xml", "application/octet-stream"})
+                .setSelectionFilter(Filters.or(Filters.contains(SearchableField.TITLE,"gpx"),Filters.contains(SearchableField.TITLE, "nmea")))
                 .build(googleApiClient);
         try {
             getActivity().startIntentSenderForResult(intentSender, GDRIVE_REQUEST_CODE_OPENER, null, 0, 0, 0);
