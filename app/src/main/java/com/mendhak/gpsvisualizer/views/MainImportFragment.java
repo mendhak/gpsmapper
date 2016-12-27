@@ -194,7 +194,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
         IntentSender intentSender = Drive.DriveApi
                 .newOpenFileActivityBuilder()
-                .setMimeType(new String[]{"application/vnd.google-earth.gpx+xml", "text/xml", "text/*", "application/gpx+xml", "application/xml"})
+                .setMimeType(new String[]{"application/vnd.google-earth.gpx+xml", "text/xml", "text/plain", "text/*", "application/gpx+xml", "application/xml", "application/octet-stream"})
                 .build(googleApiClient);
         try {
             getActivity().startIntentSenderForResult(intentSender, GDRIVE_REQUEST_CODE_OPENER, null, 0, 0, 0);
@@ -323,7 +323,7 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
     private void ProcessUserGpsFile(String gpxContents, String fileName) {
 
         InputStream stream = new ByteArrayInputStream(gpxContents.getBytes(Charsets.UTF_8));
-        Gpx10Parser parser = new Gpx10Parser();
+        BaseParser parser = BaseParser.GetParserFromFilename(fileName);
         GpsTrack track = parser.GetTrack(stream);
         dataImportListener.OnDataImported(track);
 
