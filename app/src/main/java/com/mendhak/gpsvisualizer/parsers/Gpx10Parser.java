@@ -10,14 +10,11 @@ import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 import org.xml.sax.helpers.DefaultHandler;
-
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
-import java.text.ParseException;
 import java.util.Calendar;
+import java.util.GregorianCalendar;
 import java.util.List;
 
 import javax.xml.parsers.SAXParser;
@@ -128,8 +125,9 @@ public class Gpx10Parser extends BaseParser {
             if(qName.equalsIgnoreCase("time")){
 
                 try {
-                    calendar = ISO8601.toCalendar(sb.toString());
-                } catch (ParseException e) {
+                    calendar = GregorianCalendar.getInstance();
+                    calendar.setTime(DateUtils.parseIso8601DateTime(sb.toString()));
+                } catch (Exception e) {
                     Log.e("GPSVisualizer", "Could not parse " + sb.toString(), e);
                     calendar = null;
                 }
