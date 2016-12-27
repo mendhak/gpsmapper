@@ -99,9 +99,6 @@ android {
 }
 
 dependencies {
-    compile files('libs/oceanebelle.parser.engine.jar')
-    compile fileTree(dir: './src/main/libs', include: '*.aar')
-    compile fileTree(dir: './src/main/libs', include: '*.jar')
 
     compile 'com.android.support:support-v13:25.0.1'
     compile 'com.google.android.gms:play-services:9.8.0'

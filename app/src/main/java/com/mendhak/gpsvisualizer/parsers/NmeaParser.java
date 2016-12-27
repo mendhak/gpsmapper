@@ -96,7 +96,9 @@ public class NmeaParser extends BaseParser {
                     }
                 });
 
+                //RMC gives date, speed while GGA only has time
                 point.setSpeed(rmcPoint.getSpeed());
+                point.setCalendar(rmcPoint.getCalendar());
                 trackPoints.add(point);
             }
             catch (NoSuchElementException nsee){
