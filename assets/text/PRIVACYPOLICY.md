@@ -1,6 +1,6 @@
 # Privacy Policy
 
-Last updated: December 25 2016
+Last updated: December 27 2016
 
 #### In short - We do not collect any personal information from you.   
 
