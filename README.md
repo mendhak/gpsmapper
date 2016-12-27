@@ -1,12 +1,12 @@
 #GPSVisualizer For Android
 
-This app will import GPX, KML or NMEA files and show various visualizations of your tracks, including a Google Map overlay, charts and statistics.
+This app will import GPX or NMEA files and show various visualizations of your tracks, including a Google Map overlay, charts and statistics.
  
 ## TODO
 
-* Import files from GDrive, Dropbox
-* Import KML, NMEA
-* Distance stats, Time stats
+* Import files from Dropbox
+* Import KML
+* Show previously viewed files
  
  
 ## Credits
