@@ -237,7 +237,9 @@ public class MainImportFragment extends Fragment implements View.OnClickListener
 
             if (clip != null) {
                 for (int i = 0; i < clip.getItemCount(); i++) {
-                    Uri uri = clip.getItemAt(i).getUri();
+                    //Uri uri = clip.getItemAt(i).getUri();
+                    File file = com.nononsenseapps.filepicker.Utils.getFileForUri(clip.getItemAt(i).getUri());
+                    Uri uri = Uri.fromFile(file);
                     Log.d("GPSVisualizer", "File URI= " + uri);
                     chosenFiles.add(uri);
                 }

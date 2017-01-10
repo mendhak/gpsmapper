@@ -1,6 +1,7 @@
 package com.mendhak.gpsvisualizer.views;
 
 
+import android.support.annotation.Nullable;
 import com.nononsenseapps.filepicker.AbstractFilePickerFragment;
 import com.nononsenseapps.filepicker.FilePickerActivity;
 
@@ -13,12 +14,10 @@ public class SortedFilePickerActivity extends FilePickerActivity {
     }
 
     @Override
-    protected AbstractFilePickerFragment<File> getFragment(
-            final String startPath, final int mode, final boolean allowMultiple,
-            final boolean allowCreateDir) {
-        // Only the fragment in this line needs to be changed
+    protected AbstractFilePickerFragment<File> getFragment(@Nullable String startPath, int mode, boolean allowMultiple, boolean allowCreateDir, boolean allowExistingFile, boolean singleClick) {
         SortedFilePickerFragment fragment = new SortedFilePickerFragment();
-        fragment.setArgs(startPath, mode, allowMultiple, allowCreateDir);
+        fragment.setArgs(startPath, mode, allowMultiple, allowCreateDir, allowExistingFile, singleClick);
         return fragment;
     }
+
 }
