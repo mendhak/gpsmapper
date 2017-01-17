@@ -6,9 +6,9 @@ Last updated: December 27 2016
 
 ## Summary
 
-Welcome to GPSVisualizer for Android ("us", "we", "GPSVisualizer" or "our").
+Welcome to GPS Mapper for Android ("us", "we", "GPS Mapper" or "our").
 
-GPSVisualizer does not collect any personal information, analytics, tracking or profiling data.  Read below to understand what happens to the information that you provide to GPSVisualizer.
+GPS Mapper does not collect any personal information, analytics, tracking or profiling data.  Read below to understand what happens to the information that you provide to GPSVisualizer.
 
 When you select a file from local storage, the file is parsed within the app and displayed on your device.  This information is not collected in any way by us.
 

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">GPS Visualizer</string>
+    <string name="app_name">GPSMapper</string>
     <string name="title_section1">Import</string>
     <string name="title_section2">Map</string>
     <string name="title_section3">Charts</string>

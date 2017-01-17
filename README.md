@@ -1,4 +1,4 @@
-#GPSVisualizer For Android
+#GPS Mapper For Android
 
 This app will import GPX or NMEA files and show various visualizations of your tracks, including a Google Map overlay, charts and statistics.
  

@@ -48,7 +48,7 @@ public class Gpx10Parser extends BaseParser {
             track.setWayPoints(wayPoints);
 
         } catch (Exception e) {
-            Log.e("GPSVisualizer", "Could not parse GPX file", e);
+            Log.e("GPSMapper", "Could not parse GPX file", e);
             e.printStackTrace();
         }
 
@@ -128,7 +128,7 @@ public class Gpx10Parser extends BaseParser {
                     calendar = GregorianCalendar.getInstance();
                     calendar.setTime(DateUtils.parseIso8601DateTime(sb.toString()));
                 } catch (Exception e) {
-                    Log.e("GPSVisualizer", "Could not parse " + sb.toString(), e);
+                    Log.e("GPSMapper", "Could not parse " + sb.toString(), e);
                     calendar = null;
                 }
             }
