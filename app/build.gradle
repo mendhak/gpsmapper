@@ -86,7 +86,7 @@ android {
 
             // Use a closure to map the file name
             rename { String fileName ->
-                fileName.replace('release', android.defaultConfig.versionName).replace('app', 'gpsvisualizer')
+                fileName.replace('release', android.defaultConfig.versionName).replace('app', 'gpsmapper')
             }
         }
     }
