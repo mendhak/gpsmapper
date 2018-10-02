@@ -67,7 +67,6 @@ public class Gpx10Parser extends BaseParser {
         Calendar calendar;
         double accumulatedDistance = 0;
 
-
         StringBuilder sb;
         boolean parseIt = false;
 
@@ -105,7 +104,17 @@ public class Gpx10Parser extends BaseParser {
                             trackPoints.get(trackPoints.size() - 1).getLatitude(),
                             trackPoints.get(trackPoints.size() - 1).getLongitude()
                     );
+
+                    speed = Utils.CalculateSpeed(
+                            lat,
+                            lon,
+                            calendar.getTimeInMillis(),
+                            trackPoints.get(trackPoints.size() - 1).getLatitude(),
+                            trackPoints.get(trackPoints.size() - 1).getLongitude(),
+                            trackPoints.get(trackPoints.size() -1).getCalendar().getTimeInMillis()
+                    );
                 }
+
                 if(qName.equalsIgnoreCase("trkpt")) {
                     trackPoints.add(GpsPoint.from(lat, lon, elevation, calendar, new Float(accumulatedDistance), speed));
                 }
@@ -137,9 +146,6 @@ public class Gpx10Parser extends BaseParser {
                 elevation = Float.valueOf(sb.toString());
             }
 
-            if(qName.equalsIgnoreCase("speed")){
-                speed = Float.valueOf(sb.toString());
-            }
         }
 
         public void characters(char ch[], int start, int length) throws SAXException {

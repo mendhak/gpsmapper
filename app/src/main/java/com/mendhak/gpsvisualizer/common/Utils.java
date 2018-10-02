@@ -40,6 +40,12 @@ public class Utils {
 
     }
 
+    public static Float CalculateSpeed(float latitude1, float longitude1, long timestamp1, float latitude2, float longitude2, long timestamp2) {
+        float distance = (float)CalculateDistance(latitude1, longitude1, latitude2, longitude2);
+        long elapsedTime = Math.abs(timestamp1-timestamp2)/1000;
+        return distance/elapsedTime;
+    }
+
     public static boolean IsPackageInstalled(String packagename, Context context) {
         PackageManager pm = context.getPackageManager();
         try {
@@ -102,4 +108,6 @@ public class Utils {
 
         return result;
     }
+
+
 }
