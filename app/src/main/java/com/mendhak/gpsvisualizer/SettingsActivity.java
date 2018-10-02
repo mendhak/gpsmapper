@@ -55,7 +55,7 @@ public class SettingsActivity extends PreferenceActivity {
 
         Preference pref_version = (Preference)findPreference("pref_version");
         try {
-            pref_version.setTitle("GPSVisualizer - Version " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
+            pref_version.setTitle("GPS Mapper - Version " + getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
         } catch (PackageManager.NameNotFoundException e) { }
 
 
