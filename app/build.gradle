@@ -38,8 +38,8 @@ android {
         applicationId "com.mendhak.gpsvisualizer"
         minSdkVersion 16
         targetSdkVersion 26
-        versionCode 11
-        versionName "11"
+        versionCode 12
+        versionName "12"
 
         multiDexEnabled true
     }
@@ -84,24 +84,25 @@ android {
 
 
 
-    task copyFinalAPK(group:"build") {
-        copy {
-            from "build/outputs/apk/app-release.apk"
-            into "./"
-
-            // Use a closure to map the file name
-            rename { String fileName ->
-                fileName.replace('release', android.defaultConfig.versionName).replace('app', 'gpsmapper')
-            }
-        }
-    }
-
 
 
     //Predexing libraries takes up too much memory and causes travis-ci to choke
     dexOptions {
         javaMaxHeapSize "4g"
         preDexLibraries = false
+    }
+}
+
+task copyFinalAPK(group:"build") {
+    def finalApkName = "gpsmapper-"+android.defaultConfig.versionName+".apk"
+    copy {
+        from "build/outputs/apk/release/app-release.apk"
+        into "./"
+
+        // Use a closure to map the file name
+        rename { String fileName ->
+            fileName.replace("app-release.apk", finalApkName)
+        }
     }
 }
 
